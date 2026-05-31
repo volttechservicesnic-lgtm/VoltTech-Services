@@ -30,6 +30,7 @@
             color: var(--text-dark);
             background-color: var(--white);
             line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* --- NAVEGACIÓN --- */
@@ -46,9 +47,15 @@
         }
 
         .nav-logo {
-            height: 45px;
+            height: 35px;
             display: flex;
             align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .nav-logo {
+                height: 45px;
+            }
         }
 
         .nav-logo img { height: 100%; width: auto; }
@@ -66,7 +73,6 @@
             .nav-links a:hover {
                 color: var(--blue);
             }
-            /* Enlace destacado estilo botón en Nav */
             .nav-links a.nav-btn-accent {
                 background-color: var(--navy);
                 color: var(--white);
@@ -81,80 +87,105 @@
 
         /* --- HERO SECTION --- */
         .hero {
-            padding: 60px 5%;
+            padding: 40px 5% 60px;
             text-align: center;
             background: linear-gradient(180deg, var(--white) 0%, var(--light-bg) 100%);
         }
 
         .hero-logo-main {
-            max-width: 120px;
+            max-width: 100px;
             height: auto;
             margin-bottom: 20px;
         }
 
+        @media (min-width: 768px) {
+            .hero-logo-main {
+                max-width: 120px;
+            }
+        }
+
         .hero h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: var(--navy);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: 700;
             text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
         }
 
         .hero p {
             max-width: 600px;
             margin: 0 auto 30px;
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero p {
+                font-size: 1.1rem;
+            }
         }
 
         /* Contenedor de Botones del Hero */
         .hero-actions {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto 0;
         }
 
         @media (min-width: 600px) {
             .hero-actions {
                 flex-direction: row;
+                max-width: none;
+            }
+        }
+
+        /* Botones estructurados */
+        .btn-whatsapp, .btn-inspection {
+            width: 100%;
+            height: 52px;
+            padding: 0 24px;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+
+        @media (min-width: 600px) {
+            .btn-whatsapp, .btn-inspection {
+                width: auto;
             }
         }
 
         .btn-whatsapp {
             background-color: #25D366;
             color: white;
-            padding: 16px 32px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: opacity 0.2s;
         }
-
         .btn-whatsapp:hover { opacity: 0.9; }
 
-        /* Botón de Inspección Técnica */
         .btn-inspection {
             background-color: var(--navy);
             color: var(--white);
-            padding: 16px 32px;
-            border-radius: 6px;
-            border: none;
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s;
         }
-
         .btn-inspection:hover {
             background-color: var(--blue);
         }
@@ -165,7 +196,7 @@
             color: white;
             padding: 30px 5%;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             text-align: center;
         }
@@ -174,7 +205,10 @@
         .trust-item p { font-size: 0.8rem; opacity: 0.8; }
 
         /* --- SERVICIOS --- */
-        .section { padding: 80px 5%; }
+        .section { padding: 60px 5%; }
+        @media (min-width: 768px) {
+            .section { padding: 80px 5%; }
+        }
         .section-title { margin-bottom: 40px; text-align: center; }
         .section-title h2 { color: var(--navy); font-size: 1.8rem; }
         
@@ -220,71 +254,88 @@
             overflow-y: auto;
             background-color: rgba(0, 43, 73, 0.6);
             backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 15px 10px;
         }
 
         .modal.active {
-            display: flex;
+            display: block;
         }
 
         .modal-content {
             background-color: var(--white);
             border-radius: 8px;
             width: 100%;
-            max-width: 650px;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             position: relative;
+            margin: 15px auto;
             animation: modalFadeIn 0.3s ease;
         }
 
+        @media (min-width: 768px) {
+            .modal-content {
+                padding: 40px;
+                margin: 40px auto;
+            }
+        }
+
         @keyframes modalFadeIn {
-            from { transform: translateY(-20px); opacity: 0; }
+            from { transform: translateY(-15px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 
         .close-btn {
             position: absolute;
             top: 15px;
-            right: 20px;
-            font-size: 28px;
+            right: 15px;
+            font-size: 24px;
             font-weight: bold;
             color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.2s;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--light-bg);
+            transition: background-color 0.2s, color 0.2s;
         }
 
         .close-btn:hover {
             color: var(--navy);
+            background: var(--border);
         }
 
         .modal-header {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            padding-right: 35px;
         }
 
         .modal-header h2 {
             color: var(--navy);
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
         }
 
         .modal-header p {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         /* DISEÑO DE FORMULARIO DE INSPECCIÓN */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 12px;
         }
 
         @media (min-width: 600px) {
             .form-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
             }
             .full-width {
                 grid-column: span 2;
@@ -298,7 +349,7 @@
         }
 
         .form-group label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--navy);
         }
@@ -307,20 +358,32 @@
         .form-group select, 
         .form-group textarea {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
+            font-size: 16px; /* Evita zoom en iOS */
             color: var(--text-dark);
             outline: none;
+            background-color: var(--white);
+            box-sizing: border-box;
             transition: border-color 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .form-group input:focus, 
         .form-group select:focus, 
         .form-group textarea:focus {
             border-color: var(--blue);
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234B5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
         }
 
         .form-group textarea {
@@ -336,9 +399,11 @@
         }
 
         .checkbox-group input {
-            width: auto;
-            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .checkbox-group label {
@@ -346,6 +411,7 @@
             color: var(--text-muted);
             line-height: 1.4;
             cursor: pointer;
+            user-select: none;
         }
 
         .btn-submit {
@@ -412,9 +478,10 @@
             background-color: var(--navy);
             color: var(--white);
             border: none;
-            padding: 10px 24px;
+            padding: 12px 28px;
             border-radius: 6px;
             font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: background-color 0.2s;
         }
@@ -594,27 +661,27 @@
                     <div class="form-grid">
                         <div class="form-group full-width">
                             <label for="ins-nombre">Nombre Completo *</label>
-                            <input type="text" id="ins-nombre" placeholder="Ej. Juan Pérez" required>
+                            <input type="text" id="ins-nombre" name="name" placeholder="Ej. Juan Pérez" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="ins-telefono">Número de Teléfono *</label>
-                            <input type="tel" id="ins-telefono" placeholder="Ej. 7542-2893" required>
+                            <input type="tel" id="ins-telefono" name="phone" placeholder="Ej. 7542-2893" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="ins-email">Correo Electrónico *</label>
-                            <input type="email" id="ins-email" placeholder="cliente@correo.com" required>
+                            <input type="email" id="ins-email" name="email" placeholder="cliente@correo.com" required>
                         </div>
                         
                         <div class="form-group full-width">
                             <label for="ins-direccion">Dirección del Servicio *</label>
-                            <input type="text" id="ins-direccion" placeholder="Calle, Barrio o Residencial, Managua" required>
+                            <input type="text" id="ins-direccion" name="address" placeholder="Calle, Barrio o Residencial, Managua" required>
                         </div>
                         
                         <div class="form-group full-width">
                             <label for="ins-servicio">Tipo de Servicio *</label>
-                            <select id="ins-servicio" required>
+                            <select id="ins-servicio" name="service" required>
                                 <option value="" disabled selected>Seleccione una opción...</option>
                                 <option value="Inspección eléctrica">Inspección eléctrica</option>
                                 <option value="Diagnóstico de fallas">Diagnóstico de fallas</option>
@@ -630,17 +697,17 @@
                         
                         <div class="form-group">
                             <label for="ins-fecha">Fecha preferida de visita *</label>
-                            <input type="date" id="ins-fecha" required>
+                            <input type="date" id="ins-fecha" name="date" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="ins-hora">Hora preferida de visita *</label>
-                            <input type="time" id="ins-hora" required>
+                            <input type="time" id="ins-hora" name="time" required>
                         </div>
                         
                         <div class="form-group full-width">
                             <label for="ins-descripcion">Descripción del problema o trabajo solicitado *</label>
-                            <textarea id="ins-descripcion" placeholder="Describa brevemente el problema eléctrico o de plomería..." required></textarea>
+                            <textarea id="ins-descripcion" name="message" placeholder="Describa brevemente el problema eléctrico o de plomería..." required></textarea>
                         </div>
                     </div>
                     
@@ -697,7 +764,7 @@
         </div>
     </footer>
 
-    <!-- BOTÓN FLOTANTE DE WHATSAPP (Se mantiene en todo momento) -->
+    <!-- BOTÓN FLOTANTE DE WHATSAPP -->
     <a href="https://wa.me/50575422893" class="float-wa" target="_blank" rel="noopener noreferrer">
         <i data-lucide="message-circle"></i>
     </a>
@@ -738,7 +805,6 @@
             modal.classList.remove('active');
             document.body.style.overflow = ''; // Restaura scroll
             
-            // Espera a que termine la animación de cerrado para resetear el formulario
             setTimeout(() => {
                 form.reset();
                 formContainer.style.display = 'block';
@@ -746,13 +812,12 @@
             }, 300);
         };
 
-        // Eventos para abrir y cerrar
+        // Eventos de apertura/cierre
         if (openBtnHero) openBtnHero.addEventListener('click', openModal);
         if (openBtnNav) openBtnNav.addEventListener('click', openModal);
         if (closeBtn) closeBtn.addEventListener('click', closeModal);
         if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
 
-        // Cerrar si se hace click fuera del recuadro blanco
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal();
@@ -765,7 +830,6 @@
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
-            // Genera número aleatorio de 4 dígitos (1000 a 9999)
             const randomDigits = Math.floor(1000 + Math.random() * 9000);
             return `VT-${yyyy}${mm}${dd}-${randomDigits}`;
         };
@@ -777,43 +841,76 @@
             // Generar el código de referencia
             const referenceCode = generateVTCode();
 
-            // Recopilar los datos del formulario
+            // Recopilar los datos del formulario estructurados de acuerdo a las variables de las plantillas de EmailJS
             const submissionData = {
-                vt_code: referenceCode,
-                nombre_cliente: document.getElementById('ins-nombre').value,
-                telefono_cliente: document.getElementById('ins-telefono').value,
-                correo_cliente: document.getElementById('ins-email').value,
-                direccion_servicio: document.getElementById('ins-direccion').value,
-                tipo_servicio: document.getElementById('ins-servicio').value,
-                fecha_preferida: document.getElementById('ins-fecha').value,
-                hora_preferida: document.getElementById('ins-hora').value,
-                descripcion_trabajo: document.getElementById('ins-descripcion').value
+                ticket: referenceCode,
+                name: document.getElementById('ins-nombre').value,
+                phone: document.getElementById('ins-telefono').value,
+                email: document.getElementById('ins-email').value,
+                address: document.getElementById('ins-direccion').value,
+                service: document.getElementById('ins-servicio').value,
+                date: document.getElementById('ins-fecha').value,
+                time: document.getElementById('ins-hora').value,
+                message: document.getElementById('ins-descripcion').value
             };
 
-            // 1. Guardar temporalmente en localStorage y console.log
-            localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
-            console.log("Nueva solicitud de inspección guardada temporalmente:", submissionData);
+            // 1. Mostrar datos en consola antes del envío
+            console.log("--- DATOS PREPARADOS PARA ENVIAR A EMAILJS ---");
+            console.table(submissionData);
+            console.log("JSON exacto:", JSON.stringify(submissionData, null, 2));
 
-            // Cambiar texto de botón para indicar carga
+            // 2. Guardar en localStorage
+            localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
+            console.log("Registro guardado en localStorage correctamente.");
+
+            // Deshabilitar botón durante el proceso
             const submitBtn = form.querySelector('.btn-submit');
             const originalBtnHTML = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Enviando...';
 
-            // Enviar correos en paralelo
-            const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData);
-            const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData);
+            console.log("Iniciando peticiones de correo...");
 
-            // Resolver promesas de envío
-            Promise.all([sendToClient, sendToAdmin])
-                .then(() => {
-                    console.log("Ambos correos enviados exitosamente vía EmailJS.");
-                    mostrarPantallaExito(referenceCode);
+            // 3. Ejecución de envíos a EmailJS
+            
+            // Enviar Correo al Administrador
+            const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData)
+                .then((response) => {
+                    console.log("SUCCESS: Correo enviado al Administrador.", response.status, response.text);
                 })
                 .catch((error) => {
-                    console.error("Error al procesar el envío de correos:", error);
-                    // Mostrar pantalla de éxito para asegurar una buena experiencia de usuario
-                    mostrarPantallaExito(referenceCode); 
+                    console.error("ERROR: Falló el envío del correo al Administrador.", error);
+                    // Lanza el error para manejo en la promesa general
+                    throw error; 
+                });
+
+            // Enviar Correo al Cliente
+            // Nota: Se envía con el mismo objeto, asegurando que la llave 'email' esté disponible para {{email}} en el destinatario de la plantilla
+            const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData)
+                .then((response) => {
+                    console.log("SUCCESS: Correo enviado al Cliente a la dirección:", submissionData.email, response.status, response.text);
+                })
+                .catch((error) => {
+                    console.error("ERROR: Falló el envío del correo de confirmación al Cliente.", error);
+                    console.error("Recomendación: Confirme que en el campo 'To Email' (Para) de la plantilla 'template_i8im4be' se use exactamente la variable {{email}}.");
+                    throw error;
+                });
+
+            // Resolver de forma paralela y manejar la interfaz
+            Promise.allSettled([sendToAdmin, sendToClient])
+                .then((results) => {
+                    console.log("Resultado final de los procesos de envío:", results);
+                    
+                    const adminSuccess = results[0].status === 'fulfilled';
+                    const clientSuccess = results[1].status === 'fulfilled';
+
+                    if (adminSuccess || clientSuccess) {
+                        // Si al menos un correo se procesó, mostramos confirmación visual
+                        mostrarPantallaExito(referenceCode);
+                    } else {
+                        // Falla total
+                        alert("Hubo un problema de conexión al procesar sus correos de inspección. Por favor, intente de nuevo.");
+                    }
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
@@ -826,319 +923,6 @@
             formContainer.style.display = 'none';
             successContainer.style.display = 'block';
         };
-    </script>
-</body>
-</html>            --border: #E5E7EB;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text-dark);
-            background-color: var(--white);
-            line-height: 1.5;
-        }
-
-        /* --- NAVEGACIÓN --- */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 5%;
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-logo {
-            height: 45px;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-logo img { height: 100%; width: auto; }
-
-        .nav-links { display: none; }
-        @media (min-width: 768px) {
-            .nav-links { display: flex; gap: 20px; }
-            .nav-links a { 
-                text-decoration: none; 
-                color: var(--text-dark); 
-                font-size: 14px; 
-                font-weight: 500; 
-            }
-        }
-
-        /* --- HERO SECTION (CENTRADO Y SOBRIO) --- */
-        .hero {
-            padding: 60px 5%;
-            text-align: center;
-            background: linear-gradient(180deg, var(--white) 0%, var(--light-bg) 100%);
-        }
-
-        .hero-logo-main {
-            max-width: 220px; /* El logo que enviaste como centro visual */
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-size: 2rem;
-            color: var(--navy);
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .hero p {
-            max-width: 600px;
-            margin: 0 auto 30px;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .btn-whatsapp {
-            background-color: #25D366; /* Verde estándar de contacto */
-            color: white;
-            padding: 16px 32px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: opacity 0.2s;
-        }
-
-        .btn-whatsapp:hover { opacity: 0.9; }
-
-        /* --- VALORES (CONFIANZA) --- */
-        .trust-bar {
-            background: var(--navy);
-            color: white;
-            padding: 30px 5%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            text-align: center;
-        }
-
-        .trust-item h4 { color: var(--yellow); font-size: 0.9rem; margin-bottom: 5px; }
-        .trust-item p { font-size: 0.8rem; opacity: 0.8; }
-
-        /* --- SERVICIOS (FUNCIONALES) --- */
-        .section { padding: 80px 5%; }
-        .section-title { margin-bottom: 40px; text-align: center; }
-        .section-title h2 { color: var(--navy); font-size: 1.8rem; }
-        
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            padding: 30px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: white;
-        }
-
-        .card i { color: var(--blue); margin-bottom: 15px; }
-        .card h3 { font-size: 1.1rem; margin-bottom: 10px; color: var(--navy); }
-        .card p { font-size: 0.9rem; color: var(--text-muted); }
-
-        /* --- GALERÍA SOBRIA --- */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 10px;
-        }
-        .gallery-item {
-            aspect-ratio: 1;
-            background: #eee;
-            overflow: hidden;
-        }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* --- FOOTER --- */
-        footer {
-            padding: 50px 5%;
-            background: var(--light-bg);
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .contact-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* --- BOTÓN FLOTANTE --- */
-        .float-wa {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #25D366;
-            color: white;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 1.6rem; }
-        }
-    </style>
-</head>
-<body>
-
-    <nav>
-        <div class="nav-logo">
-            <img src="logo.png" alt="VoltTech Logo">
-        </div>
-        <div class="nav-links">
-            <a href="#servicios">Servicios</a>
-            <a href="#trabajos">Trabajos</a>
-            <a href="#contacto">Contacto</a>
-        </div>
-    </nav>
-
-    <section class="hero">
-        <!-- AQUÍ VA TU LOGO (El que enviaste) -->
-        <img src="logo.png" alt="VoltTech Soluciones Residenciales" class="hero-logo-main">
-        <h1>Soluciones Eléctricas Residenciales</h1>
-        <p>Servicio técnico profesional de instalación y mantenimiento eléctrico y plomería. Atención segura y puntual para su hogar.</p>
-        <a href="https://wa.me/50575422893" class="btn-whatsapp">
-            <i data-lucide="message-circle"></i> Solicitar servicio por WhatsApp
-        </a>
-    </section>
-
-    <section class="trust-bar">
-        <div class="trust-item">
-            <h4>TRABAJO TÉCNICO</h4>
-            <p>Diagnósticos precisos y sin rodeos.</p>
-        </div>
-        <div class="trust-item">
-            <h4>LIMPIEZA</h4>
-            <p>Respetamos y cuidamos su hogar.</p>
-        </div>
-        <div class="trust-item">
-            <h4>RESPONSABILIDAD</h4>
-            <p>Cumplimos con lo acordado.</p>
-        </div>
-        <div class="trust-item">
-            <h4>PUNTUALIDAD</h4>
-            <p>Llegamos en el horario pactado.</p>
-        </div>
-    </section>
-
-    <section id="servicios" class="section">
-        <div class="section-title">
-            <h2>Nuestros Servicios</h2>
-        </div>
-        <div class="services-grid">
-            <div class="card">
-                <i data-lucide="zap"></i>
-                <h3>Instalaciones Eléctricas</h3>
-                <p>Nuevos puntos de luz, tomacorrientes y cableado general de la vivienda.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="wrench"></i>
-                <h3>Reparaciones</h3>
-                <p>Corrección de fallas, cortocircuitos y problemas de suministro.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="shield-check"></i>
-                <h3>Mantenimiento</h3>
-                <p>Revisión periódica para prevenir daños y asegurar el sistema.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="power"></i>
-                <h3>Breakers y Paneles</h3>
-                <p>Reemplazo y actualización de centros de carga y protecciones.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="droplets"></i>
-                <h3>Bombas de Agua</h3>
-                <p>Instalación y diagnóstico de equipos de bombeo residencial.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="activity"></i>
-                <h3>Diagnóstico de Fallas</h3>
-                <p>Evaluación técnica para identificar problemas ocultos.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="pipette"></i>
-                <h3>Plomería Residencial</h3>
-                <p>Reparaciones generales de tuberías y grifería.</p>
-            </div>
-            <div class="card">
-                <i data-lucide="layers"></i>
-                <h3>Sistemas Hidráulicos</h3>
-                <p>Mantenimiento de redes de agua y drenajes domésticos.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="trabajos" class="section" style="background: #fafafa;">
-        <div class="section-title">
-            <h2>Trabajos Realizados</h2>
-        </div>
-        <div class="gallery-grid">
-            <!-- Fotos de trabajos reales -->
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=60&w=500" alt="Trabajo"></div>
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1558211583-d26f610c1eb1?auto=format&fit=crop&q=60&w=500" alt="Trabajo"></div>
-            <div class="gallery-item"><img src="https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?auto=format&fit=crop&q=60&w=500" alt="Trabajo"></div>
-        </div>
-    </section>
-
-    <footer id="contacto">
-        <div class="footer-content">
-            <div>
-                <h3 style="margin-bottom: 15px; font-size: 1rem;">VoltTech</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">Servicios eléctricos y plomería.<br>Managua, Nicaragua.</p>
-            </div>
-            <div>
-                <h3 style="margin-bottom: 15px; font-size: 1rem;">Contacto</h3>
-                <a href="tel:+50575422893" class="contact-link"><i data-lucide="phone" size="16"></i> WhatsApp: +5057542-2893</a>
-                <a href="mailto:volttechservices.nic@gmail.com" class="contact-link"><i data-lucide="mail" size="16"></i> volttechservices.nic@gmail.com</a>
-                <a href="https://www.facebook.com/share/18g69wiZav" target="_blank" rel="noopener noreferrer" class="contact-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0;">
-                        <path fill="#1877F2" d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.026 1.791-4.697 4.533-4.697 1.313 0 2.686.235 2.686.235v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
-                    </svg>
-                    Facebook
-                </a>
-            </div>
-        </div>
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 0.75rem; text-align: center; color: var(--text-muted);">
-            © 2023 VoltTech. Soluciones residenciales técnicas y seguras.
-        </div>
-    </footer>
-
-    <a href="https://wa.me/50575422893" class="float-wa">
-        <i data-lucide="message-circle"></i>
-    </a>
-
-    <script>
-        lucide.createIcons();
     </script>
 </body>
 </html>
