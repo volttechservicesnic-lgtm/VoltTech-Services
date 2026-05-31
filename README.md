@@ -68,7 +68,7 @@
         }
 
         .hero-logo-main {
-            max-width: 120px; /* El logo que enviaste como centro visual */
+            max-width: 220px; /* El logo que enviaste como centro visual */
             height: auto;
             margin-bottom: 20px;
         }
@@ -77,7 +77,7 @@
             font-size: 2rem;
             color: var(--navy);
             margin-bottom: 10px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
         }
 
