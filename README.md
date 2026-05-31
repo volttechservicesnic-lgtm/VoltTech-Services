@@ -1885,6 +1885,46 @@
             lucide.createIcons();
         }
 
+        // Cliente propone otra fecha alternativamente
+        if (customerProposalForm) {
+            customerProposalForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const ticketId = document.getElementById('cust-ticket-id').value;
+                const customDate = document.getElementById('cust-new-date').value;
+                const customTime = document.getElementById('cust-new-time').value;
+
+                volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
+                const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
+                if (reqIndex === -1) return;
+
+                const req = volttech_requests[reqIndex];
+                req.status = "Esperando revisión del administrador";
+                req.newDate = customDate;
+                req.newTime = customTime;
+                addHistoryEntry(req, `Cliente propuso fecha alternativa: ${customDate} a las ${customTime}`, "Cliente");
+                
+                localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+
+                const adminPayload = {
+                    ticket: req.ticket,
+                    name: req.name,
+                    email: req.email,
+                    phone: req.phone,
+                    service: req.service,
+                    subject: `Nueva contrapropuesta de fecha - ${req.ticket}`,
+                    message: `El cliente ${req.name} sugiere el día ${customDate} a las ${customTime} para realizar la inspección técnica.`
+                };
+
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
+
+                if (customerProposalContainer) customerProposalContainer.style.display = 'none';
+                if (customerSuccessTitle) customerSuccessTitle.textContent = "Sugerencia Recibida";
+                if (customerSuccessText) customerSuccessText.textContent = `La propuesta alternativa (${customDate} a las ${customTime}) ha sido enviada al administrador. Evaluaremos el ajuste de agenda inmediatamente.`;
+                if (customerSuccess) customerSuccess.style.display = 'block';
+                lucide.createIcons();
+            });
+        }
+
 
         // ==========================================================================
         // --- CONTROLADORES DE ACCESO ADMINISTRATIVO ---
@@ -2198,6 +2238,7 @@
             addHistoryEntry(req, "Solicitud confirmada por el administrador.");
             localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
+            // Notificación al cliente utilizando la plantilla de cliente única
             const emailPayload = {
                 subject: `Solicitud confirmada - ${req.ticket}`,
                 ticket: req.ticket,
@@ -2250,6 +2291,7 @@
         };
 
         const renderCalendar = () => {
+            // LOG: Renderizando calendario
             console.log("Renderizando calendario");
             try {
                 const calendarContainer = document.getElementById('calendar-container');
@@ -2294,6 +2336,8 @@
                     const cell = createCalendarCell(year, month + 1, i, true);
                     calendarContainer.appendChild(cell);
                 }
+                
+                // LOG: Calendario renderizado
                 console.log("Calendario renderizado");
             } catch (calendarError) {
                 console.error("Error crítico durante el render del calendario:", calendarError);
@@ -2362,8 +2406,8 @@
                 inspectionForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
-                    // 1. Log: "Inicio envío"
-                    console.log("Inicio envío");
+                    // LOG: "Inicio del envío" (REQ 1)
+                    console.log("Inicio del envío");
 
                     const submitBtn = inspectionForm.querySelector('.btn-submit');
                     const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
@@ -2396,6 +2440,9 @@
                     try {
                         localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
                         localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
+                        
+                        // LOG: "Solicitud guardada" (REQ 1)
+                        console.log("Solicitud guardada");
                     } catch (storageError) {
                         console.error("Error guardando localmente:", storageError);
                     }
@@ -2412,30 +2459,48 @@
                         message: "Su solicitud de inspección técnica ha sido registrada de forma segura en nuestro sistema de atención.\n\nPronto evaluaremos la disponibilidad del horario propuesto." + INSTITUTIONAL_FOOTER
                     };
 
-                    // Despachar promesas con logs específicos integrados (REQ)
+                    // Despachar promesas con logs específicos integrados (REQ 1, REQ 3)
                     const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, clientPayload)
                         .then((res) => {
-                            // 2. Log: "Correo cliente enviado"
+                            // LOG: "Correo cliente enviado" (REQ 1)
                             console.log("Correo cliente enviado");
                             return res;
+                        })
+                        .catch((err) => {
+                            console.error("Falla en el correo del cliente:", err);
+                            throw err;
                         });
 
                     const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData)
                         .then((res) => {
-                            // 3. Log: "Correo admin enviado"
-                            console.log("Correo admin enviado");
+                            // LOG: "Correo administrador enviado" (REQ 1)
+                            console.log("Correo administrador enviado");
                             return res;
+                        })
+                        .catch((err) => {
+                            console.error("Falla en el correo del administrador:", err);
+                            throw err;
                         });
 
-                    Promise.all([sendToClient, sendToAdmin])
+                    // Timeout de seguridad de 15 segundos (REQ 4)
+                    const timeoutPromise = new Promise((_, reject) => {
+                        setTimeout(() => {
+                            reject(new Error("La operación tardó más de 15 segundos (Límite de tiempo de red excedido). Verifique sus credenciales o su conexión."));
+                        }, 15000);
+                    });
+
+                    // Ejecutar carrera de promesas para controlar el timeout (REQ 4, REQ 5)
+                    Promise.race([
+                        Promise.all([sendToClient, sendToAdmin]),
+                        timeoutPromise
+                    ])
                         .then(([resClient, resAdmin]) => {
-                            console.log("SUCCESS [PÚBLICO]: Correos enviados correctamente.", resClient, resAdmin);
-                            
-                            // 4. Log: "Solicitud completada"
-                            console.log("Solicitud completada");
+                            // LOG: "Proceso completado" (REQ 1)
+                            console.log("Proceso completado");
 
                             mostrarPantallaExito(referenceCode);
                             
+                            // Se ejecuta de manera segura en try/catch para evitar caídas falsas por render del admin
                             try {
                                 syncAdminPanel();
                             } catch (adminError) {
@@ -2443,9 +2508,10 @@
                             }
                         })
                         .catch((error) => {
-                            console.error("ERROR [PÚBLICO]: Error de correo.", error);
-                            alert("Atención: Los servidores de correo respondieron con un error (" + (error.text || error) + "). Capture su código para seguimiento: " + referenceCode);
-                            mostrarPantallaExito(referenceCode); 
+                            console.error("ERROR CRÍTICO AL ENVIAR LA SOLICITUD:", error);
+                            // Mostrar mensaje de error real en pantalla (REQ 12)
+                            alert("Atención: " + (error.message || error.text || error) + "\n\nCódigo de seguimiento generado: " + referenceCode);
+                            mostrarPantallaExito(referenceCode); // Preservamos el flujo visual
                             
                             try {
                                 syncAdminPanel();
@@ -2454,6 +2520,7 @@
                             }
                         })
                         .finally(() => {
+                            // Asegurar que el botón vuelva a habilitarse en éxito o error (REQ 8)
                             if (submitBtn) {
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = originalBtnHTML;
@@ -2483,6 +2550,7 @@
                     
                     localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
+                    // Notificar al administrador por EmailJS
                     const adminPayload = {
                         ticket: req.ticket,
                         name: req.name,
@@ -2546,9 +2614,13 @@
             // Inactividad y Auto-Logout
             const adminPanel = document.getElementById('admin-panel');
             if (adminPanel) {
-                adminPanel.addEventListener('mousemove', resetActivityTimer);
-                adminPanel.addEventListener('keydown', resetActivityTimer);
-                adminPanel.addEventListener('click', resetActivityTimer);
+                adminPanel.addEventListener('mousemove', resetActivityTracker);
+                adminPanel.addEventListener('keydown', resetActivityTracker);
+                adminPanel.addEventListener('click', resetActivityTracker);
+            }
+
+            function resetActivityTracker() {
+                resetActivityTimer();
             }
 
             // Módulo de Recuperación
