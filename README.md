@@ -92,7 +92,7 @@
             }
         }
 
-        /* --- HERO SECTION --- */
+        /* --- HERO SECTION (Ajustes de Fondo y Estética) --- */
         .hero {
             position: relative;
             padding: 60px 5% 80px;
@@ -1627,7 +1627,6 @@
         // --- SISTEMA CRIPTOGRÁFICO DE CONTRASEÑA (CON FALLBACK INTEGRADO) ---
         // ==========================================================================
         async function hashPassword(password) {
-            // Fallback en caso de que el navegador desactive Web Crypto (despliegues HTTP no seguros o file:///)
             if (window.crypto && window.crypto.subtle) {
                 try {
                     const encoder = new TextEncoder();
@@ -1638,7 +1637,6 @@
                     console.warn("Fallo criptográfico nativo. Usando fallback de hash integrado.");
                 }
             }
-            // Algoritmo matemático liviano de contingencia
             let hash = 0;
             for (let i = 0; i < password.length; i++) {
                 const char = password.charCodeAt(i);
@@ -1729,7 +1727,14 @@
             }
         }
 
+        // Recuperador de valores seguro contra elementos DOM inexistentes o nulos
+        const getInputValue = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        };
+
         function addHistoryEntry(request, action, actor = "Administrador") {
+            if (!request) return;
             if (!request.history) {
                 request.history = [];
             }
@@ -1782,7 +1787,7 @@
             if (customerActionView) customerActionView.style.display = 'flex';
 
             volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
-            const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+            const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
 
             if (reqIndex === -1) {
                 if (customerLoading) {
@@ -1863,7 +1868,7 @@
 
                 if (customerLoading) customerLoading.style.display = 'none';
                 if (customerSuccessTitle) customerSuccessTitle.textContent = "Servicio Cancelado";
-                if (customerSuccessText) customerSuccessText.textContent = "La solicitud técnica ha sido retirada de nuestra lista de visitas activas.";
+                if (customerSuccessText) customerSuccessText.textContent = "La solicitud técnica ha sido de baja de nuestra lista de visitas activas.";
                 if (customerSuccess) customerSuccess.style.display = 'block';
 
             } else if (action === 'propose') {
@@ -1989,15 +1994,16 @@
         };
 
         const calculateMetrics = () => {
-            const pending = volttech_requests.filter(r => r.status === 'Pendiente').length;
-            const confirmed = volttech_requests.filter(r => r.status === 'Confirmada' || r.status === 'Reagendada Confirmada').length;
-            const completed = volttech_requests.filter(r => r.status === 'Completada').length;
-            const cancelled = volttech_requests.filter(r => r.status === 'Cancelada' || r.status === 'Cancelada por Cliente').length;
+            const pending = volttech_requests.filter(r => r && r.status === 'Pendiente').length;
+            const confirmed = volttech_requests.filter(r => r && (r.status === 'Confirmada' || r.status === 'Reagendada Confirmada')).length;
+            const completed = volttech_requests.filter(r => r && r.status === 'Completada').length;
+            const cancelled = volttech_requests.filter(r => r && (r.status === 'Cancelada' || r.status === 'Cancelada por Cliente')).length;
             
             const today = new Date();
             const currentYear = today.getFullYear();
             const currentMonth = today.getMonth();
             const totalThisMonth = volttech_requests.filter(r => {
+                if (!r) return false;
                 const reqDate = new Date(r.createdAt);
                 return reqDate.getFullYear() === currentYear && reqDate.getMonth() === currentMonth;
             }).length;
@@ -2016,17 +2022,13 @@
         };
 
         const filterAndSearchRequests = () => {
-            const searchEl = document.getElementById('admin-search-box');
-            const statusEl = document.getElementById('admin-filter-status');
-            const serviceEl = document.getElementById('admin-filter-service');
-            const dateEl = document.getElementById('admin-filter-date');
-
-            const query = searchEl ? searchEl.value.toLowerCase().trim() : '';
-            const statusVal = statusEl ? statusEl.value : '';
-            const serviceVal = serviceEl ? serviceEl.value : '';
-            const dateVal = dateEl ? dateEl.value : '';
+            const query = getInputValue('admin-search-box').toLowerCase().trim();
+            const statusVal = getInputValue('admin-filter-status');
+            const serviceVal = getInputValue('admin-filter-service');
+            const dateVal = getInputValue('admin-filter-date');
 
             return volttech_requests.filter(r => {
+                if (!r) return false;
                 const matchesSearch = !query || 
                     (r.ticket && r.ticket.toLowerCase().includes(query)) ||
                     (r.name && r.name.toLowerCase().includes(query)) ||
@@ -2058,11 +2060,11 @@
             filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             filtered.forEach(r => {
+                if (!r) return;
                 const creationDate = new Date(r.createdAt).toLocaleDateString('es-NI', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 const dateDisplay = r.newDate ? `<span style="text-decoration: line-through; opacity: 0.6;">${r.date}</span><br><span style="color:var(--status-rescheduled); font-weight:700;">${r.newDate}</span>` : r.date;
                 const timeDisplay = r.newTime ? `<span style="text-decoration: line-through; opacity: 0.6;">${r.time}</span><br><span style="color:var(--status-rescheduled); font-weight:700;">${r.newTime}</span>` : r.time;
                 
-                // Defensa contra estados corruptos
                 const currentStatus = r.status || "Pendiente";
                 const statusBadgeClass = currentStatus.toLowerCase().replace(/ /g, '_');
 
@@ -2116,7 +2118,7 @@
 
         // --- ACCIONES ADMIN ---
         window.viewRequestDetails = (ticketId) => {
-            const req = volttech_requests.find(r => r.ticket === ticketId);
+            const req = volttech_requests.find(r => r && r.ticket === ticketId);
             if (!req) return;
 
             const content = document.getElementById('admin-details-content');
@@ -2181,7 +2183,7 @@
         window.confirmRequest = (ticketId) => {
             if (!confirm(`¿Confirmar la solicitud técnica ${ticketId}? Se enviará un correo de confirmación al cliente.`)) return;
 
-            const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+            const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
             if (reqIndex === -1) return;
 
             const req = volttech_requests[reqIndex];
@@ -2196,7 +2198,6 @@
             addHistoryEntry(req, "Solicitud confirmada por el administrador.");
             localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-            // Notificación al cliente utilizando la plantilla de cliente única (REQ 6)
             const emailPayload = {
                 subject: `Solicitud confirmada - ${req.ticket}`,
                 ticket: req.ticket,
@@ -2217,7 +2218,7 @@
         window.completeRequest = (ticketId) => {
             if (!confirm(`¿Marcar la visita técnica ${ticketId} como Completada?`)) return;
 
-            const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+            const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
             if (reqIndex === -1) return;
 
             const req = volttech_requests[reqIndex];
@@ -2231,49 +2232,71 @@
         };
 
 
-        // --- CALENDARIO VISUAL ---
+        // --- CALENDARIO VISUAL (REFACTORIZADO Y SEGURO) ---
+        let calendarCurrentDate = new Date(2026, 4, 1); 
+
+        const monthNames = [
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ];
+
+        const getFormattedDateString = (y, m, d) => {
+            // El objeto Date de JS calcula automáticamente los desbordes de forma robusta
+            const dateObj = new Date(y, m, d);
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+
         const renderCalendar = () => {
-            const calendarContainer = document.getElementById('calendar-container');
-            if (!calendarContainer) return;
+            console.log("Renderizando calendario");
+            try {
+                const calendarContainer = document.getElementById('calendar-container');
+                if (!calendarContainer) return;
 
-            calendarContainer.innerHTML = '';
+                calendarContainer.innerHTML = '';
 
-            const year = calendarCurrentDate.getFullYear();
-            const month = calendarCurrentDate.getMonth();
+                const year = calendarCurrentDate.getFullYear();
+                const month = calendarCurrentDate.getMonth();
 
-            const monthLabel = document.getElementById('calendar-current-month-label');
-            if (monthLabel) monthLabel.textContent = `${monthNames[month]} ${year}`;
+                const monthLabel = document.getElementById('calendar-current-month-label');
+                if (monthLabel) monthLabel.textContent = `${monthNames[month]} ${year}`;
 
-            const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-            daysOfWeek.forEach(day => {
-                const headerCell = document.createElement('div');
-                headerCell.className = 'calendar-day-header';
-                headerCell.textContent = day;
-                calendarContainer.appendChild(headerCell);
-            });
+                const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+                daysOfWeek.forEach(day => {
+                    const headerCell = document.createElement('div');
+                    headerCell.className = 'calendar-day-header';
+                    headerCell.textContent = day;
+                    calendarContainer.appendChild(headerCell);
+                });
 
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
-            const totalDaysInPrevMonth = new Date(year, month, 0).getDate();
+                const firstDayIndex = new Date(year, month, 1).getDay();
+                const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+                const totalDaysInPrevMonth = new Date(year, month, 0).getDate();
 
-            for (let i = firstDayIndex; i > 0; i--) {
-                const dayNum = totalDaysInPrevMonth - i + 1;
-                const cell = createCalendarCell(year, month - 1, dayNum, true);
-                calendarContainer.appendChild(cell);
-            }
+                for (let i = firstDayIndex; i > 0; i--) {
+                    const dayNum = totalDaysInPrevMonth - i + 1;
+                    const cell = createCalendarCell(year, month - 1, dayNum, true);
+                    calendarContainer.appendChild(cell);
+                }
 
-            const today = new Date();
-            for (let dayNum = 1; dayNum <= totalDaysInMonth; dayNum++) {
-                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === dayNum;
-                const cell = createCalendarCell(year, month, dayNum, false, isToday);
-                calendarContainer.appendChild(cell);
-            }
+                const today = new Date();
+                for (let dayNum = 1; dayNum <= totalDaysInMonth; dayNum++) {
+                    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === dayNum;
+                    const cell = createCalendarCell(year, month, dayNum, false, isToday);
+                    calendarContainer.appendChild(cell);
+                }
 
-            const totalCellsRendered = firstDayIndex + totalDaysInMonth;
-            const remainingCells = 42 - totalCellsRendered;
-            for (let i = 1; i <= remainingCells; i++) {
-                const cell = createCalendarCell(year, month + 1, i, true);
-                calendarContainer.appendChild(cell);
+                const totalCellsRendered = firstDayIndex + totalDaysInMonth;
+                const remainingCells = 42 - totalCellsRendered;
+                for (let i = 1; i <= remainingCells; i++) {
+                    const cell = createCalendarCell(year, month + 1, i, true);
+                    calendarContainer.appendChild(cell);
+                }
+                console.log("Calendario renderizado");
+            } catch (calendarError) {
+                console.error("Error crítico durante el render del calendario:", calendarError);
             }
         };
 
@@ -2283,11 +2306,14 @@
             if (isOtherMonth) cell.classList.add('other-month');
             if (isToday) cell.classList.add('today');
 
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+            // Formatear fecha de forma robusta tolerando desbordes
+            const dateStr = getFormattedDateString(year, month, dayNum);
 
             cell.innerHTML = `<div class="calendar-date-number">${dayNum}</div>`;
 
+            // Filtrar únicamente confirmadas y reagendadas confirmadas (las canceladas se descartan)
             const dayEvents = volttech_requests.filter(r => {
+                if (!r) return false;
                 const targetDate = r.newDate || r.date;
                 return targetDate === dateStr && (r.status === 'Confirmada' || r.status === 'Reagendada Confirmada');
             });
@@ -2316,7 +2342,7 @@
 
 
         // ==========================================================================
-        // --- CONTROLADOR SEGURO DE EVENTOS (setupEventListeners) ---
+        // --- CONTROLADOR DE EVENTOS PROTEGIDOS (setupEventListeners) ---
         // ==========================================================================
         function setupEventListeners() {
             // Sitio Público: Apertura y Cierre de Modal
@@ -2330,12 +2356,14 @@
             if (closeBtnInspection) closeBtnInspection.addEventListener('click', closeModal);
             if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
 
-            // Envío del Formulario Público
+            // Envío del Formulario Público (Soportado con extractores seguros contra fallas DOM)
             const inspectionForm = document.getElementById('inspection-form');
             if (inspectionForm) {
                 inspectionForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    console.log("Formulario enviado");
+                    
+                    // 1. Log: "Inicio envío"
+                    console.log("Inicio envío");
 
                     const submitBtn = inspectionForm.querySelector('.btn-submit');
                     const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
@@ -2346,17 +2374,18 @@
 
                     const referenceCode = generateVTCode();
 
+                    // Lecturas seguras usando el ayudante getInputValue
                     const submissionData = {
                         ticket: referenceCode,
                         createdAt: new Date().toISOString(),
-                        name: document.getElementById('ins-nombre').value,
-                        phone: document.getElementById('ins-telefono').value,
-                        email: document.getElementById('ins-email').value,
-                        address: document.getElementById('ins-direccion').value,
-                        service: document.getElementById('ins-servicio').value,
-                        date: document.getElementById('ins-fecha').value,
-                        time: document.getElementById('ins-hora').value,
-                        message: document.getElementById('ins-descripcion').value,
+                        name: getInputValue('ins-nombre'),
+                        phone: getInputValue('ins-telefono'),
+                        email: getInputValue('ins-email'),
+                        address: getInputValue('ins-direccion'),
+                        service: getInputValue('ins-servicio'),
+                        date: getInputValue('ins-fecha'),
+                        time: getInputValue('ins-hora'),
+                        message: getInputValue('ins-descripcion'),
                         status: "Pendiente",
                         history: [
                             { date: new Date().toISOString(), action: "Solicitud registrada por el cliente.", actor: "Cliente" }
@@ -2371,7 +2400,7 @@
                         console.error("Error guardando localmente:", storageError);
                     }
 
-                    // Enviar correos: el cliente recibe la confirmación inicial en la plantilla única (REQ 6)
+                    // Enviar correos: el cliente recibe la confirmación inicial en la plantilla única
                     const clientPayload = {
                         subject: `Confirmación de solicitud de servicio - ${referenceCode}`,
                         ticket: referenceCode,
@@ -2383,15 +2412,30 @@
                         message: "Su solicitud de inspección técnica ha sido registrada de forma segura en nuestro sistema de atención.\n\nPronto evaluaremos la disponibilidad del horario propuesto." + INSTITUTIONAL_FOOTER
                     };
 
-                    const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, clientPayload);
-                    const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData);
+                    // Despachar promesas con logs específicos integrados (REQ)
+                    const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, clientPayload)
+                        .then((res) => {
+                            // 2. Log: "Correo cliente enviado"
+                            console.log("Correo cliente enviado");
+                            return res;
+                        });
+
+                    const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData)
+                        .then((res) => {
+                            // 3. Log: "Correo admin enviado"
+                            console.log("Correo admin enviado");
+                            return res;
+                        });
 
                     Promise.all([sendToClient, sendToAdmin])
                         .then(([resClient, resAdmin]) => {
                             console.log("SUCCESS [PÚBLICO]: Correos enviados correctamente.", resClient, resAdmin);
+                            
+                            // 4. Log: "Solicitud completada"
+                            console.log("Solicitud completada");
+
                             mostrarPantallaExito(referenceCode);
                             
-                            // Se ejecuta de manera segura en try/catch para evitar caídas falsas de EmailJS por render del admin
                             try {
                                 syncAdminPanel();
                             } catch (adminError) {
@@ -2428,7 +2472,7 @@
                     const customTime = document.getElementById('cust-new-time').value;
 
                     volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
-                    const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+                    const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
                     if (reqIndex === -1) return;
 
                     const req = volttech_requests[reqIndex];
@@ -2439,7 +2483,6 @@
                     
                     localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-                    // Notificar al administrador por EmailJS
                     const adminPayload = {
                         ticket: req.ticket,
                         name: req.name,
@@ -2508,7 +2551,7 @@
                 adminPanel.addEventListener('click', resetActivityTimer);
             }
 
-            // Recuperación de credenciales
+            // Módulo de Recuperación
             const forgotPasswordTrigger = document.getElementById('admin-forgot-password-trigger');
             const btnBackToLogin = document.getElementById('btn-back-to-login');
             const btnSendRecoveryCode = document.getElementById('btn-send-recovery-code');
@@ -2632,27 +2675,6 @@
                 });
             }
 
-            // Gestión de pestañas administrativas (Soportado sin fallas)
-            const tabButtons = document.querySelectorAll('.admin-tab-btn');
-            const tabContents = document.querySelectorAll('.admin-section-content');
-
-            if (tabButtons && tabButtons.length > 0) {
-                tabButtons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        tabButtons.forEach(b => b.classList.remove('active'));
-                        tabContents.forEach(c => c.classList.remove('active'));
-                        btn.classList.add('active');
-                        const targetTab = btn.getAttribute('data-tab');
-                        const targetEl = document.getElementById(targetTab);
-                        if (targetEl) targetEl.classList.add('active');
-                        
-                        if (targetTab === 'admin-tab-calendar') {
-                            renderCalendar();
-                        }
-                    });
-                });
-            }
-
             // Filtros administrativos de la tabla
             const searchBox = document.getElementById('admin-search-box');
             const filterStatus = document.getElementById('admin-filter-status');
@@ -2681,6 +2703,27 @@
                 });
             }
 
+            // Gestión de pestañas administrativas
+            const tabButtons = document.querySelectorAll('.admin-tab-btn');
+            const tabContents = document.querySelectorAll('.admin-section-content');
+
+            if (tabButtons && tabButtons.length > 0) {
+                tabButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tabButtons.forEach(b => b.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        btn.classList.add('active');
+                        const targetTab = btn.getAttribute('data-tab');
+                        const targetEl = document.getElementById(targetTab);
+                        if (targetEl) targetEl.classList.add('active');
+                        
+                        if (targetTab === 'admin-tab-calendar') {
+                            renderCalendar();
+                        }
+                    });
+                });
+            }
+
             // Cerrado de modales específicos
             const closeRescheduleBtn = document.getElementById('close-modal-reschedule-btn');
             if (closeRescheduleBtn) {
@@ -2698,7 +2741,7 @@
                 });
             }
 
-            // Formularios administrativos
+            // Formularios administrativos (Proponer reagendación / Cancelar)
             const rescheduleForm = document.getElementById('admin-reschedule-form');
             if (rescheduleForm) {
                 rescheduleForm.addEventListener('submit', (e) => {
@@ -2707,7 +2750,7 @@
                     const newDate = document.getElementById('reschedule-new-date').value;
                     const newTime = document.getElementById('reschedule-new-time').value;
 
-                    const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+                    const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
                     if (reqIndex === -1) return;
 
                     const req = volttech_requests[reqIndex];
@@ -2753,7 +2796,7 @@
                     const ticketId = document.getElementById('cancel-ticket-id').value;
                     const reason = document.getElementById('cancel-reason').value;
 
-                    const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+                    const reqIndex = volttech_requests.findIndex(r => r && r.ticket === ticketId);
                     if (reqIndex === -1) return;
 
                     const req = volttech_requests[reqIndex];
@@ -2781,6 +2824,22 @@
                     if (cancelModal) cancelModal.classList.remove('active');
                     syncAdminPanel();
                     alert(`La solicitud ${ticketId} ha sido cancelada.`);
+                });
+            }
+
+            const prevMonthBtn = document.getElementById('calendar-prev-month');
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+                    renderCalendar();
+                });
+            }
+
+            const nextMonthBtn = document.getElementById('calendar-next-month');
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => {
+                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+                    renderCalendar();
                 });
             }
 
@@ -2835,22 +2894,6 @@
                     alert("Cambio seguro procesado.");
                     changePasswordForm.reset();
                     loadSecurityTab();
-                });
-            }
-
-            const prevMonthBtn = document.getElementById('calendar-prev-month');
-            if (prevMonthBtn) {
-                prevMonthBtn.addEventListener('click', () => {
-                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
-                    renderCalendar();
-                });
-            }
-
-            const nextMonthBtn = document.getElementById('calendar-next-month');
-            if (nextMonthBtn) {
-                nextMonthBtn.addEventListener('click', () => {
-                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
-                    renderCalendar();
                 });
             }
         }
