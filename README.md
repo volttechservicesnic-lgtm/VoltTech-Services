@@ -2910,7 +2910,8 @@ async function testInsert() {
         estado: "pendiente"
       }
     ]);
-
+</body>
+</html>
   console.log("DATA:", data);
   console.log("ERROR:", error);
 }
