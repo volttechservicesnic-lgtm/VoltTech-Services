@@ -1,4 +1,4 @@
-# VoltTech-Services
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -68,7 +68,7 @@
         }
 
         .hero-logo-main {
-            max-width: 220px; /* El logo que enviaste como centro visual */
+            max-width: 120px; /* El logo que enviaste como centro visual */
             height: auto;
             margin-bottom: 20px;
         }
@@ -306,7 +306,7 @@
             </div>
             <div>
                 <h3 style="margin-bottom: 15px; font-size: 1rem;">Contacto</h3>
-                <a href="tel:+50575422893" class="contact-link"><i data-lucide="phone" size="16"></i> WhatsApp: +505 7542-2893</a>
+                <a href="tel:+50575422893" class="contact-link"><i data-lucide="phone" size="16"></i> WhatsApp: +5057542-2893</a>
                 <a href="mailto:volttechservices.nic@gmail.com" class="contact-link"><i data-lucide="mail" size="16"></i> volttechservices.nic@gmail.com</a>
                 <a href="https://www.facebook.com/share/18g69wiZav" target="_blank" rel="noopener noreferrer" class="contact-link">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0;">
