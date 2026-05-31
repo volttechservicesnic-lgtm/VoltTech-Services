@@ -53,7 +53,7 @@
             z-index: 1000;
         }
 
-        /* Contenedor del Logo de la barra de navegación */
+        /* Contenedor del Logo de la barra de navegación (Proporciones corregidas) */
         .nav-logo {
             height: 40px;
             display: flex;
@@ -1649,13 +1649,17 @@
         }
 
         async function initSecurity() {
-            if (!localStorage.getItem('volttech_admin_pwd_hash')) {
-                const defaultHash = await hashPassword('volttech2026');
-                localStorage.setItem('volttech_admin_pwd_hash', defaultHash);
-                localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
-                localStorage.setItem('volttech_recovery_email', 'volttechservices.nic@gmail.com');
-                localStorage.setItem('volttech_recovery_phone', '+50575422893');
-                localStorage.setItem('volttech_auto_logout_time', '10'); 
+            try {
+                if (!localStorage.getItem('volttech_admin_pwd_hash')) {
+                    const defaultHash = await hashPassword('volttech2026');
+                    localStorage.setItem('volttech_admin_pwd_hash', defaultHash);
+                    localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
+                    localStorage.setItem('volttech_recovery_email', 'volttechservices.nic@gmail.com');
+                    localStorage.setItem('volttech_recovery_phone', '+50575422893');
+                    localStorage.setItem('volttech_auto_logout_time', '10'); 
+                }
+            } catch (securityInitError) {
+                console.error("Error al escribir configuración inicial en localStorage:", securityInitError);
             }
         }
 
@@ -1663,9 +1667,14 @@
         // ==========================================================================
         // --- SISTEMA DE ALMACENAMIENTO DE SOLICITUDES (LOCALSTORAGE) ---
         // ==========================================================================
-        let volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
+        let volttech_requests = [];
+        try {
+            volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
+        } catch (readError) {
+            console.error("Error leyendo solicitudes desde el almacenamiento local:", readError);
+        }
 
-        // Datos de prueba iniciales
+        // Datos de prueba iniciales si está vacío
         if (volttech_requests.length === 0) {
             const today = new Date();
             const formatDate = (offsetDays) => {
@@ -1713,7 +1722,11 @@
                     ]
                 }
             ];
-            localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+            try {
+                localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+            } catch (writeError) {
+                console.error("Error escribiendo solicitudes en el almacenamiento local:", writeError);
+            }
         }
 
         function addHistoryEntry(request, action, actor = "Administrador") {
@@ -1729,7 +1742,7 @@
 
 
         // ==========================================================================
-        // --- MANEJO DE MODALES PÚBLICOS ---
+        // --- MANEJO DE PORTALES PÚBLICOS (MODALES) ---
         // ==========================================================================
         const openModal = (e) => {
             if (e) e.preventDefault();
@@ -1753,28 +1766,8 @@
             }, 300);
         };
 
-        const generateVTCode = () => {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const randomDigits = Math.floor(1000 + Math.random() * 9000);
-            return `VT-${yyyy}${mm}${dd}-${randomDigits}`;
-        };
-
-        const mostrarPantallaExito = (code) => {
-            const span = document.getElementById('success-vt-code');
-            const container = document.getElementById('modal-form-container');
-            const success = document.getElementById('modal-success-container');
-
-            if (span) span.textContent = code;
-            if (container) container.style.display = 'none';
-            if (success) success.style.display = 'block';
-        };
-
-
         // ==========================================================================
-        // --- PORTAL DE ACCIONES EXTERNAS PARA EL CLIENTE ---
+        // --- DETECCIÓN DE ENLACES DE CLIENTES (ACCIONES DE CORREO) ---
         // ==========================================================================
         async function handleCustomerAction(action, ticketId) {
             const customerActionView = document.getElementById('customer-action-view');
@@ -1891,6 +1884,22 @@
         // ==========================================================================
         // --- CONTROLADORES DE ACCESO ADMINISTRATIVO ---
         // ==========================================================================
+        const showLoginModal = (e) => {
+            if (e) e.preventDefault();
+            const adminLoginModal = document.getElementById('admin-login-modal');
+            const loginFormContainer = document.getElementById('login-form-container');
+            const recoveryFormContainer = document.getElementById('recovery-form-container');
+            const adminLoginPassword = document.getElementById('admin-login-password');
+
+            if (adminLoginModal) adminLoginModal.classList.add('active');
+            if (loginFormContainer) loginFormContainer.style.display = 'block';
+            if (recoveryFormContainer) recoveryFormContainer.style.display = 'none';
+            if (adminLoginPassword) {
+                adminLoginPassword.value = '';
+                adminLoginPassword.focus();
+            }
+        };
+
         const enterAdminPanel = () => {
             const publicWebsite = document.getElementById('public-website');
             const adminPanel = document.getElementById('admin-panel');
@@ -1925,27 +1934,55 @@
         }
 
         function startAutoLogoutTracker() {
-            const autoLogoutMinutes = parseInt(localStorage.getItem('volttech_auto_logout_time')) || 10;
-            const autoLogoutMs = autoLogoutMinutes * 60 * 1000;
+            try {
+                const autoLogoutMinutes = parseInt(localStorage.getItem('volttech_auto_logout_time')) || 10;
+                const autoLogoutMs = autoLogoutMinutes * 60 * 1000;
 
-            if (autoLogoutInterval) clearInterval(autoLogoutInterval);
+                if (autoLogoutInterval) clearInterval(autoLogoutInterval);
 
-            autoLogoutInterval = setInterval(() => {
-                const adminPanel = document.getElementById('admin-panel');
-                if (adminPanel && adminPanel.style.display === 'block') {
-                    const inactiveTime = Date.now() - lastActivityTime;
-                    if (inactiveTime >= autoLogoutMs) {
-                        exitAdminPanel();
-                        alert("Su sesión ha expirado por inactividad.");
+                autoLogoutInterval = setInterval(() => {
+                    const adminPanel = document.getElementById('admin-panel');
+                    if (adminPanel && adminPanel.style.display === 'block') {
+                        const inactiveTime = Date.now() - lastActivityTime;
+                        if (inactiveTime >= autoLogoutMs) {
+                            exitAdminPanel();
+                            alert("Su sesión ha expirado por inactividad.");
+                        }
                     }
-                }
-            }, 10000); 
+                }, 10000); 
+            } catch (autoLogoutError) {
+                console.error("Error al configurar el auto-logout:", autoLogoutError);
+            }
+        }
+
+
+        // --- PESTAÑA SEGURIDAD ---
+        function loadSecurityTab() {
+            const emailEl = document.getElementById('sec-recovery-email');
+            const phoneEl = document.getElementById('sec-recovery-phone');
+            const logoutEl = document.getElementById('sec-auto-logout');
+            const lastChangeEl = document.getElementById('sec-last-pwd-change');
+
+            try {
+                if (emailEl) emailEl.value = localStorage.getItem('volttech_recovery_email') || '';
+                if (phoneEl) phoneEl.value = localStorage.getItem('volttech_recovery_phone') || '';
+                if (logoutEl) logoutEl.value = localStorage.getItem('volttech_auto_logout_time') || '10';
+                
+                const lastChange = localStorage.getItem('volttech_last_pwd_change');
+                if (lastChangeEl) lastChangeEl.textContent = lastChange ? new Date(lastChange).toLocaleString('es-NI') : 'Nunca';
+            } catch (securityReadError) {
+                console.error("Error al cargar la pestaña de seguridad:", securityReadError);
+            }
         }
 
 
         // --- OPERACIONES GENERALES DE LA TABLA ---
         const syncAdminPanel = () => {
-            volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
+            try {
+                volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
+            } catch (readError) {
+                console.error("Error de lectura al sincronizar el panel:", readError);
+            }
             calculateMetrics();
             renderTable();
             renderCalendar();
@@ -2195,13 +2232,6 @@
 
 
         // --- CALENDARIO VISUAL ---
-        let calendarCurrentDate = new Date(2026, 4, 1); 
-
-        const monthNames = [
-            "enero", "febrero", "marzo", "abril", "mayo", "junio",
-            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-        ];
-
         const renderCalendar = () => {
             const calendarContainer = document.getElementById('calendar-container');
             if (!calendarContainer) return;
@@ -2257,7 +2287,6 @@
 
             cell.innerHTML = `<div class="calendar-date-number">${dayNum}</div>`;
 
-            // Filtrar únicamente confirmadas y reagendadas confirmadas (las canceladas se descartan)
             const dayEvents = volttech_requests.filter(r => {
                 const targetDate = r.newDate || r.date;
                 return targetDate === dateStr && (r.status === 'Confirmada' || r.status === 'Reagendada Confirmada');
@@ -2287,10 +2316,10 @@
 
 
         // ==========================================================================
-        // --- CONTROLADOR DE EVENTOS PROTEGIDOS (setupEventListeners) ---
+        // --- CONTROLADOR SEGURO DE EVENTOS (setupEventListeners) ---
         // ==========================================================================
         function setupEventListeners() {
-            // Sitio Público & Registro
+            // Sitio Público: Apertura y Cierre de Modal
             const openBtnHero = document.getElementById('hero-btn-inspection');
             const openBtnNav = document.getElementById('nav-btn-inspection');
             const closeBtnInspection = document.getElementById('close-modal-btn');
@@ -2301,6 +2330,7 @@
             if (closeBtnInspection) closeBtnInspection.addEventListener('click', closeModal);
             if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
 
+            // Envío del Formulario Público
             const inspectionForm = document.getElementById('inspection-form');
             if (inspectionForm) {
                 inspectionForm.addEventListener('submit', function(e) {
@@ -2388,7 +2418,7 @@
                 });
             }
 
-            // Portal del Cliente (Contrapropuesta)
+            // Portal del Cliente (Sugerencia Alternativa)
             const customerProposalForm = document.getElementById('customer-proposal-form');
             if (customerProposalForm) {
                 customerProposalForm.addEventListener('submit', function(e) {
@@ -2409,7 +2439,7 @@
                     
                     localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-                    // Notificar al administrador por EmailJS (REQ 6)
+                    // Notificar al administrador por EmailJS
                     const adminPayload = {
                         ticket: req.ticket,
                         name: req.name,
@@ -2435,7 +2465,7 @@
                 });
             }
 
-            // Acceso Administrativo
+            // Acceso Administrativo (Botón Admin Superior)
             const navAdminAccessBtn = document.getElementById('nav-admin-access-btn');
             const adminLoginCancel = document.getElementById('admin-login-cancel');
             const adminLoginForm = document.getElementById('admin-login-form');
@@ -2478,7 +2508,7 @@
                 adminPanel.addEventListener('click', resetActivityTimer);
             }
 
-            // Módulo de Recuperación
+            // Recuperación de credenciales
             const forgotPasswordTrigger = document.getElementById('admin-forgot-password-trigger');
             const btnBackToLogin = document.getElementById('btn-back-to-login');
             const btnSendRecoveryCode = document.getElementById('btn-send-recovery-code');
@@ -2602,6 +2632,27 @@
                 });
             }
 
+            // Gestión de pestañas administrativas (Soportado sin fallas)
+            const tabButtons = document.querySelectorAll('.admin-tab-btn');
+            const tabContents = document.querySelectorAll('.admin-section-content');
+
+            if (tabButtons && tabButtons.length > 0) {
+                tabButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        tabButtons.forEach(b => b.classList.remove('active'));
+                        tabContents.forEach(c => c.classList.remove('active'));
+                        btn.classList.add('active');
+                        const targetTab = btn.getAttribute('data-tab');
+                        const targetEl = document.getElementById(targetTab);
+                        if (targetEl) targetEl.classList.add('active');
+                        
+                        if (targetTab === 'admin-tab-calendar') {
+                            renderCalendar();
+                        }
+                    });
+                });
+            }
+
             // Filtros administrativos de la tabla
             const searchBox = document.getElementById('admin-search-box');
             const filterStatus = document.getElementById('admin-filter-status');
@@ -2630,28 +2681,7 @@
                 });
             }
 
-            // Gestión de pestañas administrativas
-            const tabButtons = document.querySelectorAll('.admin-tab-btn');
-            const tabContents = document.querySelectorAll('.admin-section-content');
-
-            if (tabButtons && tabButtons.length > 0) {
-                tabButtons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        tabButtons.forEach(b => b.classList.remove('active'));
-                        tabContents.forEach(c => c.classList.remove('active'));
-                        btn.classList.add('active');
-                        const targetTab = btn.getAttribute('data-tab');
-                        const targetEl = document.getElementById(targetTab);
-                        if (targetEl) targetEl.classList.add('active');
-                        
-                        if (targetTab === 'admin-tab-calendar') {
-                            renderCalendar();
-                        }
-                    });
-                });
-            }
-
-            // Modales del Panel Administrativo
+            // Cerrado de modales específicos
             const closeRescheduleBtn = document.getElementById('close-modal-reschedule-btn');
             if (closeRescheduleBtn) {
                 closeRescheduleBtn.addEventListener('click', () => {
@@ -2668,6 +2698,7 @@
                 });
             }
 
+            // Formularios administrativos
             const rescheduleForm = document.getElementById('admin-reschedule-form');
             if (rescheduleForm) {
                 rescheduleForm.addEventListener('submit', (e) => {
@@ -2688,7 +2719,6 @@
                     addHistoryEntry(req, `Propuesta de nueva fecha enviada al cliente: ${newDate} a las ${newTime}`);
                     localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-                    // Enlaces de acción para interacción del cliente
                     const currentOrigin = window.location.href.split('?')[0]; 
                     const acceptLink = `${currentOrigin}?action=accept&ticket=${req.ticket}`;
                     const cancelLink = `${currentOrigin}?action=cancel&ticket=${req.ticket}`;
@@ -2696,7 +2726,6 @@
 
                     const msgBody = `Debido a motivos operativos no podremos atender su solicitud en la fecha inicialmente programada.\n\nLe proponemos la siguiente alternativa:\nFecha propuesta: ${newDate}\nHora propuesta: ${newTime}\n\nPor favor, responda seleccionando una de las siguientes opciones:\n\n• ACEPTAR NUEVA FECHA:\n${acceptLink}\n\n• CANCELAR SOLICITUD:\n${cancelLink}\n\n• PROPONER OTRA FECHA ALTERNATIVA:\n${proposeLink}\n\n`;
 
-                    // Notificación al cliente utilizando la plantilla de cliente única (REQ 6)
                     const emailPayload = {
                         subject: `Propuesta de nueva fecha para su solicitud ${req.ticket}`,
                         ticket: req.ticket,
@@ -2735,7 +2764,6 @@
                     addHistoryEntry(req, `Solicitud cancelada por administrador. Motivo: ${reason}`);
                     localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-                    // Notificación al cliente utilizando la plantilla de cliente única (REQ 6)
                     const emailPayload = {
                         subject: `Solicitud cancelada - ${req.ticket}`,
                         ticket: req.ticket,
@@ -2753,22 +2781,6 @@
                     if (cancelModal) cancelModal.classList.remove('active');
                     syncAdminPanel();
                     alert(`La solicitud ${ticketId} ha sido cancelada.`);
-                });
-            }
-
-            const prevMonthBtn = document.getElementById('calendar-prev-month');
-            if (prevMonthBtn) {
-                prevMonthBtn.addEventListener('click', () => {
-                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
-                    renderCalendar();
-                });
-            }
-
-            const nextMonthBtn = document.getElementById('calendar-next-month');
-            if (nextMonthBtn) {
-                nextMonthBtn.addEventListener('click', () => {
-                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
-                    renderCalendar();
                 });
             }
 
@@ -2825,28 +2837,52 @@
                     loadSecurityTab();
                 });
             }
+
+            const prevMonthBtn = document.getElementById('calendar-prev-month');
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+                    renderCalendar();
+                });
+            }
+
+            const nextMonthBtn = document.getElementById('calendar-next-month');
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => {
+                    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+                    renderCalendar();
+                });
+            }
         }
 
 
         // --- INICIALIZADOR GLOBAL (PAGE LOAD) ---
         document.addEventListener("DOMContentLoaded", async () => {
-            // Inicializar base de datos de seguridad
-            await initSecurity();
-            
-            // Vincular escuchadores de forma segura tras la carga completa del DOM
+            // 1. Vincular los escuchadores de forma inmediata (SÍNCRONO - NO BLOQUEANTE)
             setupEventListeners();
 
-            // Identificar parámetros en URL
-            const params = new URLSearchParams(window.location.search);
-            const action = params.get('action');
-            const ticket = params.get('ticket');
+            // 2. Inicializar base de datos de seguridad de forma segura
+            try {
+                await initSecurity();
+            } catch (securityError) {
+                console.error("Error al inicializar la seguridad local:", securityError);
+            }
 
-            if (action && ticket) {
-                handleCustomerAction(action, ticket);
-            } else {
-                calculateMetrics();
-                renderTable();
-                renderCalendar();
+            // 3. Cargar las vistas iniciales de forma segura
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const action = params.get('action');
+                const ticket = params.get('ticket');
+
+                if (action && ticket) {
+                    handleCustomerAction(action, ticket);
+                } else {
+                    calculateMetrics();
+                    renderTable();
+                    renderCalendar();
+                }
+            } catch (initError) {
+                console.error("Error al renderizar las vistas iniciales:", initError);
             }
         });
     </script>
