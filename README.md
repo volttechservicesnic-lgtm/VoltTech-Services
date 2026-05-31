@@ -127,8 +127,8 @@
             border: 1px solid var(--border);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
             margin-bottom: 25px;
-            width: 100px;
-            height: 100px;
+            width: 220px;
+            height:220px;
         }
 
         .hero-logo-main {
