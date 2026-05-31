@@ -92,7 +92,7 @@
             }
         }
 
-        /* --- HERO SECTION (Ajustes de Fondo y Estética) --- */
+        /* --- HERO SECTION --- */
         .hero {
             position: relative;
             padding: 60px 5% 80px;
@@ -1597,7 +1597,9 @@
 
 
     <script>
+        // ==========================================================================
         // --- CONFIGURACIÓN DE EMAILJS ---
+        // ==========================================================================
         const EMAILJS_PUBLIC_KEY = "NFTtUpZvGUe9peZW1"; 
         const EMAILJS_SERVICE_ID = "service_volttech";
         
@@ -1611,8 +1613,63 @@
         // Inicializar SDK de EmailJS
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
+
+        // ==========================================================================
+        // --- ASIGNACIÓN ÚNICA DE ELEMENTOS DEL DOM (SOLUCIONA DUPLICADOS) ---
+        // ==========================================================================
+        
+        // Sitio Público y Formulario
+        const modalInspection = document.getElementById('inspection-modal');
+        const openBtnHero = document.getElementById('hero-btn-inspection');
+        const openBtnNav = document.getElementById('nav-btn-inspection');
+        const closeBtnInspection = document.getElementById('close-modal-btn');
+        const successCloseBtn = document.getElementById('btn-success-close');
+        
+        const inspectionForm = document.getElementById('inspection-form');
+        const formContainer = document.getElementById('modal-form-container');
+        const successContainer = document.getElementById('modal-success-container');
+        const successCodeSpan = document.getElementById('success-vt-code');
+
+        // Portal Interactivo del Cliente
+        const customerActionView = document.getElementById('customer-action-view');
+        const publicWebsite = document.getElementById('public-website');
+        const customerLoading = document.getElementById('customer-loading');
+        const customerSuccess = document.getElementById('customer-success');
+        const customerSuccessTitle = document.getElementById('customer-success-title');
+        const customerSuccessText = document.getElementById('customer-success-text');
+        const customerProposalContainer = document.getElementById('customer-proposal-form-container');
+        const customerProposalForm = document.getElementById('customer-proposal-form');
+
+        // Acceso Administrativo y Modales
+        const adminPanel = document.getElementById('admin-panel');
+        const navAdminAccessBtn = document.getElementById('nav-admin-access-btn');
+        const adminLoginModal = document.getElementById('admin-login-modal');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminLoginPassword = document.getElementById('admin-login-password');
+        const adminLoginCancel = document.getElementById('admin-login-cancel');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+
+        // Módulo de Recuperación de Credenciales
+        const forgotPasswordTrigger = document.getElementById('admin-forgot-password-trigger');
+        const loginFormContainer = document.getElementById('login-form-container');
+        const recoveryFormContainer = document.getElementById('recovery-form-container');
+        const btnSendRecoveryCode = document.getElementById('btn-send-recovery-code');
+        const btnVerifyRecoveryCode = document.getElementById('btn-verify-recovery-code');
+        const btnResetPasswordSubmit = document.getElementById('btn-reset-password-submit');
+        const recoveryInputCode = document.getElementById('recovery-input-code');
+        const btnBackToLogin = document.getElementById('btn-back-to-login');
+
+        // Filtros y Controles del Listado Administrativo
+        const searchBox = document.getElementById('admin-search-box');
+        const filterStatus = document.getElementById('admin-filter-status');
+        const filterService = document.getElementById('admin-filter-service');
+        const filterDate = document.getElementById('admin-filter-date');
+        const clearFiltersBtn = document.getElementById('admin-clear-filters');
+
+
+        // ==========================================================================
         // --- SISTEMA CRIPTOGRÁFICO DE CONTRASEÑA ---
-        // Genera Hash SHA-256 local seguro para almacenamiento
+        // ==========================================================================
         async function hashPassword(password) {
             const encoder = new TextEncoder();
             const data = encoder.encode(password);
@@ -1620,7 +1677,6 @@
             return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // --- INICIALIZACIÓN DE CONFIGURACIÓN DE SEGURIDAD ---
         async function initSecurity() {
             if (!localStorage.getItem('volttech_admin_pwd_hash')) {
                 const defaultHash = await hashPassword('volttech2026');
@@ -1628,14 +1684,17 @@
                 localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
                 localStorage.setItem('volttech_recovery_email', 'volttechservices.nic@gmail.com');
                 localStorage.setItem('volttech_recovery_phone', '+50575422893');
-                localStorage.setItem('volttech_auto_logout_time', '10'); // 10 minutos por defecto
+                localStorage.setItem('volttech_auto_logout_time', '10'); 
             }
         }
 
-        // --- SISTEMA DE ALMACENAMIENTO DE SOLICITUDES ---
+
+        // ==========================================================================
+        // --- SISTEMA DE ALMACENAMIENTO DE SOLICITUDES (LOCALSTORAGE) ---
+        // ==========================================================================
         let volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
 
-        // Generación de mock data inicial si localStorage está vacío
+        // Inyección de mock data inicial si está vacío
         if (volttech_requests.length === 0) {
             const today = new Date();
             const formatDate = (offsetDays) => {
@@ -1686,7 +1745,7 @@
             localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
         }
 
-        // Ayudante de historial de auditoría
+        // Historial de auditoría
         function addHistoryEntry(request, action, actor = "Administrador") {
             if (!request.history) {
                 request.history = [];
@@ -1698,16 +1757,120 @@
             });
         }
 
-        // --- DETECCIÓN DE ENLACES DE CLIENTES (ACCIONES DE CORREO) ---
-        async function handleCustomerAction(action, ticketId) {
-            const customerActionView = document.getElementById('customer-action-view');
-            const publicWebsite = document.getElementById('public-website');
-            const customerLoading = document.getElementById('customer-loading');
-            const customerSuccess = document.getElementById('customer-success');
-            const customerSuccessTitle = document.getElementById('customer-success-title');
-            const customerSuccessText = document.getElementById('customer-success-text');
-            const customerProposalContainer = document.getElementById('customer-proposal-form-container');
 
+        // ==========================================================================
+        // --- MANEJO DEL SITIO WEB PÚBLICO (MODAL Y REGISTRO) ---
+        // ==========================================================================
+        const openModal = (e) => {
+            if (e) e.preventDefault();
+            modalInspection.classList.add('active');
+            document.body.style.overflow = 'hidden'; 
+        };
+
+        const closeModal = () => {
+            modalInspection.classList.remove('active');
+            document.body.style.overflow = ''; 
+            
+            setTimeout(() => {
+                inspectionForm.reset();
+                formContainer.style.display = 'block';
+                successContainer.style.display = 'none';
+            }, 300);
+        };
+
+        if (openBtnHero) openBtnHero.addEventListener('click', openModal);
+        if (openBtnNav) openBtnNav.addEventListener('click', openModal);
+        if (closeBtnInspection) closeBtnInspection.addEventListener('click', closeModal);
+        if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modalInspection) {
+                closeModal();
+            }
+        });
+
+        const generateVTCode = () => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const randomDigits = Math.floor(1000 + Math.random() * 9000);
+            return `VT-${yyyy}${mm}${dd}-${randomDigits}`;
+        };
+
+        // EVENTO SUBMIT DEL FORMULARIO PÚBLICO (CORREGIDO Y DIAGNOSTICADO)
+        if (inspectionForm) {
+            inspectionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // REQ 6: console.log de diagnóstico obligado
+                console.log("Formulario enviado");
+
+                const submitBtn = inspectionForm.querySelector('.btn-submit');
+                const originalBtnHTML = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Enviando Solicitud...';
+
+                const referenceCode = generateVTCode();
+
+                const submissionData = {
+                    ticket: referenceCode,
+                    createdAt: new Date().toISOString(),
+                    name: document.getElementById('ins-nombre').value,
+                    phone: document.getElementById('ins-telefono').value,
+                    email: document.getElementById('ins-email').value,
+                    address: document.getElementById('ins-direccion').value,
+                    service: document.getElementById('ins-servicio').value,
+                    date: document.getElementById('ins-fecha').value,
+                    time: document.getElementById('ins-hora').value,
+                    message: document.getElementById('ins-descripcion').value,
+                    status: "Pendiente",
+                    history: [
+                        { date: new Date().toISOString(), action: "Solicitud registrada por el cliente.", actor: "Cliente" }
+                    ]
+                };
+
+                // Guardar localmente
+                volttech_requests.push(submissionData);
+                try {
+                    localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+                    localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
+                    console.log("Registro guardado con éxito localmente:", submissionData);
+                } catch (storageError) {
+                    console.error("Error crítico guardando en localStorage:", storageError);
+                    // REQ 7: Mostrar error en pantalla ante fallas del almacenamiento local
+                    alert("Error local: Su navegador restringió el almacenamiento de datos. Intentaremos procesar el envío de correo.");
+                }
+
+                // Despachar correos simultáneos
+                const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData);
+                const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData);
+
+                Promise.all([sendToClient, sendToAdmin])
+                    .then(([resClient, resAdmin]) => {
+                        console.log("SUCCESS [PÚBLICO]: Peticiones despachadas con éxito.", resClient, resAdmin);
+                        mostrarPantallaExito(referenceCode);
+                        syncAdminPanel();
+                    })
+                    .catch((error) => {
+                        console.error("ERROR [PÚBLICO]: Error devuelto por EmailJS.", error);
+                        // REQ 7: Mostrar error visible en pantalla
+                        alert("Atención: Los servidores de correo respondieron con un error (" + (error.text || error) + "). Por favor, anote su código de orden para seguimiento directo: " + referenceCode);
+                        mostrarPantallaExito(referenceCode); // Mostramos pantalla para preservar el flujo
+                        syncAdminPanel();
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHTML;
+                    });
+            });
+        }
+
+
+        // ==========================================================================
+        // --- DETECCIÓN DE ENLACES DE CLIENTES (ACCIONES DE CORREO) ---
+        // ==========================================================================
+        async function handleCustomerAction(action, ticketId) {
             publicWebsite.style.display = 'none';
             customerActionView.style.display = 'flex';
 
@@ -1715,26 +1878,24 @@
             const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
 
             if (reqIndex === -1) {
-                customerLoading.innerHTML = `<p style="color:var(--status-cancelled); font-weight:700;">Error: No se encontró la solicitud técnica indicada.</p>`;
+                customerLoading.innerHTML = `<p style="color:var(--status-cancelled); font-weight:700;">Error: No se localizó la solicitud con código ${ticketId}.</p>`;
                 return;
             }
 
             const req = volttech_requests[reqIndex];
 
             if (action === 'accept') {
-                // El cliente acepta la nueva fecha propuesta
+                // Acepta reagendación
                 req.status = "Reagendada Confirmada";
-                
-                // Aplicar los cambios temporales de forma definitiva
                 if (req.newDate && req.newTime) {
                     req.date = req.newDate;
                     req.time = req.newTime;
                 }
                 
-                addHistoryEntry(req, `Cliente aceptó propuesta de reagendamiento. Fecha confirmada: ${req.date} a las ${req.time}`, "Cliente");
+                addHistoryEntry(req, `Propuesta aceptada por el cliente. Nueva fecha: ${req.date} a las ${req.time}`, "Cliente");
                 localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-                // Correo automático de notificación al administrador
+                // Notificación administrativa
                 const adminPayload = {
                     ticket: req.ticket,
                     name: req.name,
@@ -1742,20 +1903,20 @@
                     phone: req.phone,
                     service: req.service,
                     subject: `Nueva fecha aceptada por cliente - ${req.ticket}`,
-                    message: `El cliente ${req.name} ha aceptado la propuesta de reagendamiento para el día ${req.date} a las ${req.time}.`
+                    message: `El cliente ${req.name} aceptó el reagendamiento para el día ${req.date} a las ${req.time}.`
                 };
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
                 customerLoading.style.display = 'none';
-                customerSuccessTitle.textContent = "¡Propuesta Aceptada!";
-                customerSuccessText.textContent = `Muchas gracias. Su cita ha quedado confirmada para el día ${req.date} a las ${req.time}.`;
+                customerSuccessTitle.textContent = "¡Cita Confirmada!";
+                customerSuccessText.textContent = `La propuesta fue aceptada. Su nueva cita está programada para el día ${req.date} a las ${req.time}.`;
                 customerSuccess.style.display = 'block';
 
             } else if (action === 'cancel') {
-                // El cliente cancela su servicio técnico
+                // Cancela solicitud
                 req.status = "Cancelada por Cliente";
-                addHistoryEntry(req, "El cliente canceló la solicitud a través del enlace de correo.", "Cliente");
+                addHistoryEntry(req, "El cliente canceló la orden mediante enlace directo de correo.", "Cliente");
                 localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
                 const adminPayload = {
@@ -1765,18 +1926,18 @@
                     phone: req.phone,
                     service: req.service,
                     subject: `Solicitud cancelada por el cliente - ${req.ticket}`,
-                    message: `El cliente ${req.name} ha cancelado su solicitud tras recibir la propuesta de reagendamiento.`
+                    message: `El cliente ${req.name} decidió cancelar el servicio tras recibir la propuesta de reagendamiento.`
                 };
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
                 customerLoading.style.display = 'none';
-                customerSuccessTitle.textContent = "Solicitud Cancelada";
-                customerSuccessText.textContent = "Su orden técnica ha sido cancelada correctamente de nuestro sistema a petición suya.";
+                customerSuccessTitle.textContent = "Servicio Cancelado";
+                customerSuccessText.textContent = "La solicitud técnica ha sido retirada de nuestra lista de visitas activas.";
                 customerSuccess.style.display = 'block';
 
             } else if (action === 'propose') {
-                // El cliente decide sugerir una fecha alternativa
+                // Desea proponer otra fecha
                 customerLoading.style.display = 'none';
                 document.getElementById('cust-ticket-id').value = ticketId;
                 document.getElementById('cust-new-date').value = req.date;
@@ -1786,184 +1947,50 @@
             lucide.createIcons();
         }
 
-        // Manejar el formulario del cliente que sugiere otra fecha
-        document.getElementById('customer-proposal-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const ticketId = document.getElementById('cust-ticket-id').value;
-            const customDate = document.getElementById('cust-new-date').value;
-            const customTime = document.getElementById('cust-new-time').value;
+        // Cliente propone otra fecha alternativamente
+        if (customerProposalForm) {
+            customerProposalForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const ticketId = document.getElementById('cust-ticket-id').value;
+                const customDate = document.getElementById('cust-new-date').value;
+                const customTime = document.getElementById('cust-new-time').value;
 
-            volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
-            const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
-            if (reqIndex === -1) return;
+                volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
+                const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+                if (reqIndex === -1) return;
 
-            const req = volttech_requests[reqIndex];
-            req.status = "Esperando revisión del administrador";
-            req.newDate = customDate;
-            req.newTime = customTime;
-            addHistoryEntry(req, `Cliente propuso una fecha alternativa: ${customDate} a las ${customTime}`, "Cliente");
-            
-            localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+                const req = volttech_requests[reqIndex];
+                req.status = "Esperando revisión del administrador";
+                req.newDate = customDate;
+                req.newTime = customTime;
+                addHistoryEntry(req, `Cliente propuso fecha alternativa: ${customDate} a las ${customTime}`, "Cliente");
+                
+                localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-            const adminPayload = {
-                ticket: req.ticket,
-                name: req.name,
-                email: req.email,
-                phone: req.phone,
-                service: req.service,
-                subject: `Cliente propone fecha alternativa - ${req.ticket}`,
-                message: `El cliente ${req.name} no pudo aceptar la propuesta y sugiere una nueva alternativa: el día ${customDate} a las ${customTime}.`
-            };
+                const adminPayload = {
+                    ticket: req.ticket,
+                    name: req.name,
+                    email: req.email,
+                    phone: req.phone,
+                    service: req.service,
+                    subject: `Nueva contrapropuesta de fecha - ${req.ticket}`,
+                    message: `El cliente ${req.name} sugiere el día ${customDate} a las ${customTime} para realizar la inspección técnica.`
+                };
 
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
-            document.getElementById('customer-proposal-form-container').style.display = 'none';
-            const customerSuccess = document.getElementById('customer-success');
-            const customerSuccessTitle = document.getElementById('customer-success-title');
-            const customerSuccessText = document.getElementById('customer-success-text');
-
-            customerSuccessTitle.textContent = "Propuesta Enviada";
-            customerSuccessText.textContent = `Hemos enviado su contrapropuesta de fecha (${customDate} a las ${customTime}) al administrador. Nos comunicaremos de inmediato para validar la agenda.`;
-            customerSuccess.style.display = 'block';
-            lucide.createIcons();
-        });
-
-
-        // --- REGISTRO DE SOLICITUDES DESDE EL SITIO PÚBLICO ---
-        const modal = document.getElementById('inspection-modal');
-        const openBtnHero = document.getElementById('hero-btn-inspection');
-        const openBtnNav = document.getElementById('nav-btn-inspection');
-        const closeBtn = document.getElementById('close-modal-btn');
-        const successCloseBtn = document.getElementById('btn-success-close');
-        
-        const form = document.getElementById('inspection-form');
-        const formContainer = document.getElementById('modal-form-container');
-        const successContainer = document.getElementById('modal-success-container');
-        const successCodeSpan = document.getElementById('success-vt-code');
-
-        const openModal = (e) => {
-            if (e) e.preventDefault();
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; 
-        };
-
-        const closeModal = () => {
-            modal.classList.remove('active');
-            document.body.style.overflow = ''; 
-            
-            setTimeout(() => {
-                form.reset();
-                formContainer.style.display = 'block';
-                successContainer.style.display = 'none';
-            }, 300);
-        };
-
-        if (openBtnHero) openBtnHero.addEventListener('click', openModal);
-        if (openBtnNav) openBtnNav.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
-
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Envío del Formulario Público del Cliente
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const referenceCode = generateVTCode();
-
-            const submissionData = {
-                ticket: referenceCode,
-                createdAt: new Date().toISOString(),
-                name: document.getElementById('ins-nombre').value,
-                phone: document.getElementById('ins-telefono').value,
-                email: document.getElementById('ins-email').value,
-                address: document.getElementById('ins-direccion').value,
-                service: document.getElementById('ins-servicio').value,
-                date: document.getElementById('ins-fecha').value,
-                time: document.getElementById('ins-hora').value,
-                message: document.getElementById('ins-descripcion').value,
-                status: "Pendiente",
-                history: [
-                    { date: new Date().toISOString(), action: "Solicitud registrada por el cliente.", actor: "Cliente" }
-                ]
-            };
-
-            volttech_requests.push(submissionData);
-            localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
-            localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
-
-            const submitBtn = form.querySelector('.btn-submit');
-            const originalBtnHTML = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Enviando...';
-
-            const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData);
-            const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData);
-
-            Promise.all([sendToClient, sendToAdmin])
-                .then(([resClient, resAdmin]) => {
-                    console.log("SUCCESS [PÚBLICO]: Correos enviados correctamente.", resClient, resAdmin);
-                    mostrarPantallaExito(referenceCode);
-                    syncAdminPanel();
-                })
-                .catch((error) => {
-                    console.error("ERROR [PÚBLICO]: EmailJS error.", error);
-                    mostrarPantallaExito(referenceCode);
-                    syncAdminPanel();
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnHTML;
-                });
-        });
+                customerProposalContainer.style.display = 'none';
+                customerSuccessTitle.textContent = "Sugerencia Recibida";
+                customerSuccessText.textContent = `La propuesta alternativa (${customDate} a las ${customTime}) ha sido enviada al administrador. Evaluaremos el ajuste de agenda inmediatamente.`;
+                customerSuccess.style.display = 'block';
+                lucide.createIcons();
+            });
+        }
 
 
         // ==========================================================================
         // --- CONTROLADORES DE ACCESO ADMINISTRATIVO ---
         // ==========================================================================
-
-        const publicWebsite = document.getElementById('public-website');
-        const adminPanel = document.getElementById('admin-panel');
-        const navAdminAccessBtn = document.getElementById('nav-admin-access-btn');
-        const adminLoginModal = document.getElementById('admin-login-modal');
-        const adminLoginForm = document.getElementById('admin-login-form');
-        const adminLoginPassword = document.getElementById('admin-login-password');
-        const adminLoginCancel = document.getElementById('admin-login-cancel');
-        const adminLogoutBtn = document.getElementById('admin-logout-btn');
-
-        // Módulo de Olvido/Recuperación de Contraseña
-        const forgotPasswordTrigger = document.getElementById('admin-forgot-password-trigger');
-        const loginFormContainer = document.getElementById('login-form-container');
-        const recoveryFormContainer = document.getElementById('recovery-form-container');
-        const btnSendRecoveryCode = document.getElementById('btn-send-recovery-code');
-        const btnVerifyRecoveryCode = document.getElementById('btn-verify-recovery-code');
-        const btnResetPasswordSubmit = document.getElementById('btn-reset-password-submit');
-        const recoveryInputCode = document.getElementById('recovery-input-code');
-        const btnBackToLogin = document.getElementById('btn-back-to-login');
-
-        // Navegación de pestañas en Panel Administrativo
-        const tabButtons = document.querySelectorAll('.admin-tab-btn');
-        const tabContents = document.querySelectorAll('.admin-section-content');
-
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                btn.classList.add('active');
-                const targetTab = btn.getAttribute('data-tab');
-                document.getElementById(targetTab).classList.add('active');
-                
-                if (targetTab === 'admin-tab-calendar') {
-                    renderCalendar();
-                }
-            });
-        });
-
-        // Eventos de acceso de seguridad (Password Prompt)
         const showLoginModal = (e) => {
             e.preventDefault();
             adminLoginModal.classList.add('active');
@@ -1976,21 +2003,23 @@
         if (navAdminAccessBtn) navAdminAccessBtn.addEventListener('click', showLoginModal);
         if (adminLoginCancel) adminLoginCancel.addEventListener('click', () => adminLoginModal.classList.remove('active'));
 
-        // Validar contraseña cifrada
-        adminLoginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const inputHash = await hashPassword(adminLoginPassword.value);
-            const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
+        // Cifrado y login
+        if (adminLoginForm) {
+            adminLoginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const inputHash = await hashPassword(adminLoginPassword.value);
+                const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
 
-            if (inputHash === storedHash) {
-                adminLoginModal.classList.remove('active');
-                enterAdminPanel();
-            } else {
-                alert("Contraseña de administración incorrecta.");
-                adminLoginPassword.value = '';
-                adminLoginPassword.focus();
-            }
-        });
+                if (inputHash === storedHash) {
+                    adminLoginModal.classList.remove('active');
+                    enterAdminPanel();
+                } else {
+                    alert("Contraseña de administración incorrecta.");
+                    adminLoginPassword.value = '';
+                    adminLoginPassword.focus();
+                }
+            });
+        }
 
         const enterAdminPanel = () => {
             publicWebsite.style.display = 'none';
@@ -2012,7 +2041,7 @@
         if (adminLogoutBtn) adminLogoutBtn.addEventListener('click', exitAdminPanel);
 
 
-        // --- SISTEMA DE SESIÓN ACTIVA Y AUTO-CIERRE ---
+        // --- AUTOMÁTICO INACTIVIDAD ---
         let lastActivityTime = Date.now();
         let autoLogoutInterval = null;
 
@@ -2030,12 +2059,11 @@
                 if (adminPanel.style.display === 'block') {
                     const inactiveTime = Date.now() - lastActivityTime;
                     if (inactiveTime >= autoLogoutMs) {
-                        console.warn("Cerrando sesión por inactividad prolongada.");
                         exitAdminPanel();
-                        alert("Su sesión de administración ha expirado por inactividad.");
+                        alert("Su sesión ha expirado por inactividad.");
                     }
                 }
-            }, 10000); // Evalúa cada 10 segundos
+            }, 10000); 
         }
 
         adminPanel.addEventListener('mousemove', resetActivityTimer);
@@ -2043,96 +2071,103 @@
         adminPanel.addEventListener('click', resetActivityTimer);
 
 
-        // --- MANEJO DE OLVIDO DE CONTRASEÑA (EMAILJS GENERACIÓN DE CÓDIGO) ---
-        forgotPasswordTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginFormContainer.style.display = 'none';
-            recoveryFormContainer.style.display = 'block';
-            document.getElementById('recovery-step-1').style.display = 'block';
-            document.getElementById('recovery-step-2').style.display = 'none';
-            document.getElementById('recovery-step-3').style.display = 'none';
-        });
-
-        btnBackToLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            recoveryFormContainer.style.display = 'none';
-            loginFormContainer.style.display = 'block';
-        });
-
-        btnSendRecoveryCode.addEventListener('click', () => {
-            const recoveryEmail = localStorage.getItem('volttech_recovery_email');
-            
-            // Generar código de 6 dígitos
-            const tempCode = String(Math.floor(100000 + Math.random() * 900000));
-            sessionStorage.setItem('volttech_temp_recovery_code', tempCode);
-
-            const payload = {
-                to_email: recoveryEmail,
-                recovery_code: tempCode
-            };
-
-            btnSendRecoveryCode.disabled = true;
-            btnSendRecoveryCode.textContent = 'Enviando código...';
-
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESET_CODE_ID, payload)
-                .then(() => {
-                    alert(`Se ha enviado un código temporal de recuperación a ${recoveryEmail}. Revise su buzón de entrada.`);
-                    document.getElementById('recovery-step-1').style.display = 'none';
-                    document.getElementById('recovery-step-2').style.display = 'block';
-                    recoveryInputCode.focus();
-                })
-                .catch((error) => {
-                    console.error("Error al enviar código temporal:", error);
-                    alert("No se pudo realizar el envío del código mediante EmailJS. Comuníquese por soporte.");
-                })
-                .finally(() => {
-                    btnSendRecoveryCode.disabled = false;
-                    btnSendRecoveryCode.textContent = 'Enviar Código de Verificación';
-                });
-        });
-
-        btnVerifyRecoveryCode.addEventListener('click', () => {
-            const inputVal = recoveryInputCode.value.trim();
-            const storedCode = sessionStorage.getItem('volttech_temp_recovery_code');
-
-            if (inputVal === storedCode && inputVal !== '') {
+        // --- RECUPERACIÓN DE CONTRASEÑA ---
+        if (forgotPasswordTrigger) {
+            forgotPasswordTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginFormContainer.style.display = 'none';
+                recoveryFormContainer.style.display = 'block';
+                document.getElementById('recovery-step-1').style.display = 'block';
                 document.getElementById('recovery-step-2').style.display = 'none';
-                document.getElementById('recovery-step-3').style.display = 'block';
-            } else {
-                alert("Código de verificación inválido. Por favor, revise.");
-                recoveryInputCode.value = '';
-                recoveryInputCode.focus();
-            }
-        });
+                document.getElementById('recovery-step-3').style.display = 'none';
+            });
+        }
 
-        btnResetPasswordSubmit.addEventListener('click', async () => {
-            const newPwd = document.getElementById('rec-new-pwd').value;
-            const confirmPwd = document.getElementById('rec-confirm-pwd').value;
+        if (btnBackToLogin) {
+            btnBackToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                recoveryFormContainer.style.display = 'none';
+                loginFormContainer.style.display = 'block';
+            });
+        }
 
-            // Validar fuerza de clave
-            const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-            if (!pwdRegex.test(newPwd)) {
-                alert("La contraseña debe tener mínimo 8 caracteres, al menos una letra y al menos un número.");
-                return;
-            }
+        if (btnSendRecoveryCode) {
+            btnSendRecoveryCode.addEventListener('click', () => {
+                const recoveryEmail = localStorage.getItem('volttech_recovery_email');
+                const tempCode = String(Math.floor(100000 + Math.random() * 900000));
+                sessionStorage.setItem('volttech_temp_recovery_code', tempCode);
 
-            if (newPwd !== confirmPwd) {
-                alert("Las contraseñas escritas no coinciden.");
-                return;
-            }
+                const payload = {
+                    to_email: recoveryEmail,
+                    recovery_code: tempCode
+                };
 
-            const newHash = await hashPassword(newPwd);
-            localStorage.setItem('volttech_admin_pwd_hash', newHash);
-            localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
+                btnSendRecoveryCode.disabled = true;
+                btnSendRecoveryCode.textContent = 'Enviando código...';
 
-            alert("Su contraseña de administración ha sido cambiada correctamente. Puede iniciar sesión.");
-            sessionStorage.removeItem('volttech_temp_recovery_code');
-            recoveryFormContainer.style.display = 'none';
-            loginFormContainer.style.display = 'block';
-        });
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESET_CODE_ID, payload)
+                    .then(() => {
+                        alert(`Se ha enviado un código temporal a: ${recoveryEmail}`);
+                        document.getElementById('recovery-step-1').style.display = 'none';
+                        document.getElementById('recovery-step-2').style.display = 'block';
+                        recoveryInputCode.focus();
+                    })
+                    .catch((error) => {
+                        console.error("Falla recuperador EmailJS:", error);
+                        alert("Error despachando código. Contacte al programador.");
+                    })
+                    .finally(() => {
+                        btnSendRecoveryCode.disabled = false;
+                        btnSendRecoveryCode.textContent = 'Enviar Código de Verificación';
+                    });
+            });
+        }
+
+        if (btnVerifyRecoveryCode) {
+            btnVerifyRecoveryCode.addEventListener('click', () => {
+                const inputVal = recoveryInputCode.value.trim();
+                const storedCode = sessionStorage.getItem('volttech_temp_recovery_code');
+
+                if (inputVal === storedCode && inputVal !== '') {
+                    document.getElementById('recovery-step-2').style.display = 'none';
+                    document.getElementById('recovery-step-3').style.display = 'block';
+                } else {
+                    alert("Código incorrecto.");
+                    recoveryInputCode.value = '';
+                    recoveryInputCode.focus();
+                }
+            });
+        }
+
+        if (btnResetPasswordSubmit) {
+            btnResetPasswordSubmit.addEventListener('click', async () => {
+                const newPwd = document.getElementById('rec-new-pwd').value;
+                const confirmPwd = document.getElementById('rec-confirm-pwd').value;
+
+                const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+                if (!pwdRegex.test(newPwd)) {
+                    alert("Debe poseer letras, números y longitud de mínimo 8.");
+                    return;
+                }
+
+                if (newPwd !== confirmPwd) {
+                    alert("Las claves no coinciden.");
+                    return;
+                }
+
+                const newHash = await hashPassword(newPwd);
+                localStorage.setItem('volttech_admin_pwd_hash', newHash);
+                localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
+
+                alert("Cambio de clave exitoso.");
+                sessionStorage.removeItem('volttech_temp_recovery_code');
+                recoveryFormContainer.style.display = 'none';
+                loginFormContainer.style.display = 'block';
+            });
+        }
 
 
-        // --- PESTAÑA ADMINISTRATIVA DE SEGURIDAD Y CONFIGURACIÓN ---
+        // --- PESTAÑA SEGURIDAD ---
         function loadSecurityTab() {
             document.getElementById('sec-recovery-email').value = localStorage.getItem('volttech_recovery_email') || '';
             document.getElementById('sec-recovery-phone').value = localStorage.getItem('volttech_recovery_phone') || '';
@@ -2142,58 +2177,62 @@
             document.getElementById('sec-last-pwd-change').textContent = lastChange ? new Date(lastChange).toLocaleString('es-NI') : 'Nunca';
         }
 
-        document.getElementById('admin-security-settings-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const recEmail = document.getElementById('sec-recovery-email').value;
-            const recPhone = document.getElementById('sec-recovery-phone').value;
-            const autoLogout = document.getElementById('sec-auto-logout').value;
+        const securitySettingsForm = document.getElementById('admin-security-settings-form');
+        if (securitySettingsForm) {
+            securitySettingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const recEmail = document.getElementById('sec-recovery-email').value;
+                const recPhone = document.getElementById('sec-recovery-phone').value;
+                const autoLogout = document.getElementById('sec-auto-logout').value;
 
-            localStorage.setItem('volttech_recovery_email', recEmail);
-            localStorage.setItem('volttech_recovery_phone', recPhone);
-            localStorage.setItem('volttech_auto_logout_time', autoLogout);
+                localStorage.setItem('volttech_recovery_email', recEmail);
+                localStorage.setItem('volttech_recovery_phone', recPhone);
+                localStorage.setItem('volttech_auto_logout_time', autoLogout);
 
-            alert("Configuración de seguridad de VoltTech guardada.");
-            startAutoLogoutTracker(); // Refresca tiempo de tracker
-        });
+                alert("Ajustes guardados.");
+                startAutoLogoutTracker();
+            });
+        }
 
-        document.getElementById('admin-change-password-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const current = document.getElementById('pwd-current').value;
-            const newPwd = document.getElementById('pwd-new').value;
-            const confirmPwd = document.getElementById('pwd-confirm').value;
+        const changePasswordForm = document.getElementById('admin-change-password-form');
+        if (changePasswordForm) {
+            changePasswordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const current = document.getElementById('pwd-current').value;
+                const newPwd = document.getElementById('pwd-new').value;
+                const confirmPwd = document.getElementById('pwd-confirm').value;
 
-            // Validar contraseña actual
-            const currentHash = await hashPassword(current);
-            const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
+                const currentHash = await hashPassword(current);
+                const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
 
-            if (currentHash !== storedHash) {
-                alert("La contraseña actual ingresada es incorrecta.");
-                return;
-            }
+                if (currentHash !== storedHash) {
+                    alert("Clave actual incorrecta.");
+                    return;
+                }
 
-            // Validar fuerza de clave
-            const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-            if (!pwdRegex.test(newPwd)) {
-                alert("La nueva contraseña debe poseer al menos 8 caracteres, conteniendo al menos una letra y un número.");
-                return;
-            }
+                const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+                if (!pwdRegex.test(newPwd)) {
+                    alert("Mínimo 8 caracteres, al menos un número y una letra.");
+                    return;
+                }
 
-            if (newPwd !== confirmPwd) {
-                alert("Las contraseñas escritas no coinciden.");
-                return;
-            }
+                if (newPwd !== confirmPwd) {
+                    alert("Las contraseñas no coinciden.");
+                    return;
+                }
 
-            const newHash = await hashPassword(newPwd);
-            localStorage.setItem('volttech_admin_pwd_hash', newHash);
-            localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
+                const newHash = await hashPassword(newPwd);
+                localStorage.setItem('volttech_admin_pwd_hash', newHash);
+                localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
 
-            alert("Su contraseña ha sido cambiada de forma segura.");
-            document.getElementById('admin-change-password-form').reset();
-            loadSecurityTab();
-        });
+                alert("Cambio seguro procesado.");
+                changePasswordForm.reset();
+                loadSecurityTab();
+            });
+        }
 
 
-        // --- PANEL DE CONTROL ADMINISTRATIVO: DETALLES, HISTORIAL Y ACCIONES ---
+        // --- OPERACIONES GENERALES DE LA TABLA ---
         const syncAdminPanel = () => {
             volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
             calculateMetrics();
@@ -2201,17 +2240,15 @@
             renderCalendar();
         };
 
-        // 1. Panel de Estadísticas (Métricas exactas)
         const calculateMetrics = () => {
             const pending = volttech_requests.filter(r => r.status === 'Pendiente').length;
             const confirmed = volttech_requests.filter(r => r.status === 'Confirmada' || r.status === 'Reagendada Confirmada').length;
             const completed = volttech_requests.filter(r => r.status === 'Completada').length;
             const cancelled = volttech_requests.filter(r => r.status === 'Cancelada' || r.status === 'Cancelada por Cliente').length;
             
-            // Filtro por mes actual
             const today = new Date();
             const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth(); // 0-11
+            const currentMonth = today.getMonth();
             const totalThisMonth = volttech_requests.filter(r => {
                 const reqDate = new Date(r.createdAt);
                 return reqDate.getFullYear() === currentYear && reqDate.getMonth() === currentMonth;
@@ -2224,18 +2261,11 @@
             document.getElementById('stat-count-month').textContent = totalThisMonth;
         };
 
-        // 2. Tabla de Solicitudes (Filtros y Búsqueda)
-        const searchBox = document.getElementById('admin-search-box');
-        const filterStatus = document.getElementById('admin-filter-status');
-        const filterService = document.getElementById('admin-filter-service');
-        const filterDate = document.getElementById('admin-filter-date');
-        const clearFiltersBtn = document.getElementById('admin-clear-filters');
-
         const filterAndSearchRequests = () => {
             const query = searchBox.value.toLowerCase().trim();
             const statusVal = filterStatus.value;
             const serviceVal = filterService.value;
-            const dateVal = filterDate.value; // yyyy-mm-dd
+            const dateVal = filterDate.value;
 
             return volttech_requests.filter(r => {
                 const matchesSearch = !query || 
@@ -2268,8 +2298,6 @@
 
             filtered.forEach(r => {
                 const creationDate = new Date(r.createdAt).toLocaleDateString('es-NI', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                
-                // Formatear si tiene fecha reagendada
                 const dateDisplay = r.newDate ? `<span style="text-decoration: line-through; opacity: 0.6;">${r.date}</span><br><span style="color:var(--status-rescheduled); font-weight:700;">${r.newDate}</span>` : r.date;
                 const timeDisplay = r.newTime ? `<span style="text-decoration: line-through; opacity: 0.6;">${r.time}</span><br><span style="color:var(--status-rescheduled); font-weight:700;">${r.newTime}</span>` : r.time;
 
@@ -2320,23 +2348,23 @@
             lucide.createIcons();
         };
 
-        searchBox.addEventListener('input', renderTable);
-        filterStatus.addEventListener('change', renderTable);
-        filterService.addEventListener('change', renderTable);
-        filterDate.addEventListener('change', renderTable);
+        if (searchBox) searchBox.addEventListener('input', renderTable);
+        if (filterStatus) filterStatus.addEventListener('change', renderTable);
+        if (filterService) filterService.addEventListener('change', renderTable);
+        if (filterDate) filterDate.addEventListener('change', renderTable);
         
-        clearFiltersBtn.addEventListener('click', () => {
-            searchBox.value = '';
-            filterStatus.value = '';
-            filterService.value = '';
-            filterDate.value = '';
-            renderTable();
-        });
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                searchBox.value = '';
+                filterStatus.value = '';
+                filterService.value = '';
+                filterDate.value = '';
+                renderTable();
+            });
+        }
 
 
-        // --- PROCESOS Y ACCIONES DE SOLICITUDES ---
-
-        // A. Ver detalles e historial de Auditoría
+        // --- ACCIONES ADMIN ---
         window.viewRequestDetails = (ticketId) => {
             const req = volttech_requests.find(r => r.ticket === ticketId);
             if (!req) return;
@@ -2360,7 +2388,6 @@
                 extraInfo += `<div class="detail-item detail-full"><h4>Motivo de Cancelación:</h4><p style="color:var(--status-cancelled); font-style: italic;">"${req.cancellationReason}"</p></div>`;
             }
 
-            // Renderizar el historial de auditoría
             let historyHtml = '<div class="detail-item detail-full"><h4>Historial de Auditoría:</h4><div style="background:#F9FAFB; padding:12px; border-radius:6px; border:1px solid var(--border); max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-top:5px;">';
             if (req.history && req.history.length > 0) {
                 req.history.forEach(h => {
@@ -2400,7 +2427,6 @@
             document.getElementById('admin-modal-details').classList.remove('active');
         });
 
-        // B. Confirmar Solicitud
         window.confirmRequest = (ticketId) => {
             if (!confirm(`¿Confirmar la solicitud técnica ${ticketId}? Se enviará un correo de confirmación al cliente.`)) return;
 
@@ -2411,7 +2437,6 @@
             req.status = "Confirmada";
             req.confirmedAt = new Date().toISOString();
             
-            // Si el administrador confirma una propuesta que fue reagendada alternativamente
             if (req.newDate && req.newTime) {
                 req.date = req.newDate;
                 req.time = req.newTime;
@@ -2420,7 +2445,6 @@
             addHistoryEntry(req, "Solicitud confirmada por el administrador.");
             localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-            // Enviar correo automático de confirmación al cliente mediante EmailJS [4]
             const emailPayload = {
                 ticket: req.ticket,
                 name: req.name,
@@ -2435,7 +2459,6 @@
             alert(`La solicitud ${ticketId} ha sido confirmada.`);
         };
 
-        // C. Reagendar Solicitud (Envia propuesta sin cambiar de estado inmediato)
         const rescheduleModal = document.getElementById('admin-modal-reschedule');
         const rescheduleForm = document.getElementById('admin-reschedule-form');
 
@@ -2454,50 +2477,49 @@
             rescheduleModal.classList.remove('active');
         });
 
-        rescheduleForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const ticketId = document.getElementById('reschedule-ticket-id').value;
-            const newDate = document.getElementById('reschedule-new-date').value;
-            const newTime = document.getElementById('reschedule-new-time').value;
+        if (rescheduleForm) {
+            rescheduleForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const ticketId = document.getElementById('reschedule-ticket-id').value;
+                const newDate = document.getElementById('reschedule-new-date').value;
+                const newTime = document.getElementById('reschedule-new-time').value;
 
-            const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
-            if (reqIndex === -1) return;
+                const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+                if (reqIndex === -1) return;
 
-            const req = volttech_requests[reqIndex];
-            req.status = "Propuesta de Reagendación Pendiente";
-            req.newDate = newDate;
-            req.newTime = newTime;
-            req.rescheduledAt = new Date().toISOString();
+                const req = volttech_requests[reqIndex];
+                req.status = "Propuesta de Reagendación Pendiente";
+                req.newDate = newDate;
+                req.newTime = newTime;
+                req.rescheduledAt = new Date().toISOString();
 
-            addHistoryEntry(req, `Propuesta de nueva fecha enviada al cliente: ${newDate} a las ${newTime}`);
-            localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+                addHistoryEntry(req, `Propuesta de nueva fecha enviada al cliente: ${newDate} a las ${newTime}`);
+                localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-            // Generar enlaces para la respuesta interactiva del cliente sin backend
-            const currentOrigin = window.location.href.split('?')[0]; 
-            const acceptLink = `${currentOrigin}?action=accept&ticket=${req.ticket}`;
-            const cancelLink = `${currentOrigin}?action=cancel&ticket=${req.ticket}`;
-            const proposeLink = `${currentOrigin}?action=propose&ticket=${req.ticket}`;
+                const currentOrigin = window.location.href.split('?')[0]; 
+                const acceptLink = `${currentOrigin}?action=accept&ticket=${req.ticket}`;
+                const cancelLink = `${currentOrigin}?action=cancel&ticket=${req.ticket}`;
+                const proposeLink = `${currentOrigin}?action=propose&ticket=${req.ticket}`;
 
-            // Enviar correo automático con la propuesta e interactividad [4]
-            const emailPayload = {
-                ticket: req.ticket,
-                name: req.name,
-                email: req.email,
-                new_date: newDate,
-                new_time: newTime,
-                accept_link: acceptLink,
-                cancel_link: cancelLink,
-                propose_link: proposeLink
-            };
+                const emailPayload = {
+                    ticket: req.ticket,
+                    name: req.name,
+                    email: req.email,
+                    new_date: newDate,
+                    new_time: newTime,
+                    accept_link: acceptLink,
+                    cancel_link: cancelLink,
+                    propose_link: proposeLink
+                };
 
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESCHEDULE_ID, emailPayload);
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESCHEDULE_ID, emailPayload);
 
-            rescheduleModal.classList.remove('active');
-            syncAdminPanel();
-            alert(`Se ha enviado la propuesta de reagendamiento al cliente.`);
-        });
+                rescheduleModal.classList.remove('active');
+                syncAdminPanel();
+                alert(`Se ha enviado la propuesta de reagendamiento al cliente.`);
+            });
+        }
 
-        // D. Completar Solicitud
         window.completeRequest = (ticketId) => {
             if (!confirm(`¿Marcar la visita técnica ${ticketId} como Completada?`)) return;
 
@@ -2514,7 +2536,6 @@
             alert(`La solicitud ${ticketId} ha sido completada.`);
         };
 
-        // E. Cancelar Solicitud
         const cancelModal = document.getElementById('admin-modal-cancel');
         const cancelForm = document.getElementById('admin-cancel-form');
 
@@ -2528,42 +2549,41 @@
             cancelModal.classList.remove('active');
         });
 
-        cancelForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const ticketId = document.getElementById('cancel-ticket-id').value;
-            const reason = document.getElementById('cancel-reason').value;
+        if (cancelForm) {
+            cancelForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const ticketId = document.getElementById('cancel-ticket-id').value;
+                const reason = document.getElementById('cancel-reason').value;
 
-            const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
-            if (reqIndex === -1) return;
+                const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
+                if (reqIndex === -1) return;
 
-            const req = volttech_requests[reqIndex];
-            req.status = "Cancelada";
-            req.cancellationReason = reason;
-            req.cancelledAt = new Date().toISOString();
+                const req = volttech_requests[reqIndex];
+                req.status = "Cancelada";
+                req.cancellationReason = reason;
+                req.cancelledAt = new Date().toISOString();
 
-            addHistoryEntry(req, `Solicitud cancelada por administrador. Motivo: ${reason}`);
-            localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+                addHistoryEntry(req, `Solicitud cancelada por administrador. Motivo: ${reason}`);
+                localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-            // Enviar correo de cancelación al cliente [4]
-            const emailPayload = {
-                ticket: req.ticket,
-                name: req.name,
-                email: req.email,
-                reason: reason
-            };
+                const emailPayload = {
+                    ticket: req.ticket,
+                    name: req.name,
+                    email: req.email,
+                    reason: reason
+                };
 
-            // Reutilización del template de cliente para notificarle de su cancelación
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, emailPayload);
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, emailPayload);
 
-            cancelModal.classList.remove('active');
-            syncAdminPanel();
-            alert(`La solicitud ${ticketId} ha sido cancelada.`);
-        });
+                cancelModal.classList.remove('active');
+                syncAdminPanel();
+                alert(`La solicitud ${ticketId} ha sido cancelada.`);
+            });
+        }
 
 
-        // --- 3. CALENDARIO VISUAL INTERACTIVO ---
-
-        let calendarCurrentDate = new Date(2026, 4, 1); // Mayo de 2026
+        // --- CALENDARIO VISUAL ---
+        let calendarCurrentDate = new Date(2026, 4, 1); 
 
         const monthNames = [
             "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -2671,10 +2691,8 @@
             const ticket = params.get('ticket');
 
             if (action && ticket) {
-                // Si la URL posee parámetros de cliente, se rutea al portal interactivo
                 handleCustomerAction(action, ticket);
             } else {
-                // Flujo normal público
                 calculateMetrics();
                 renderTable();
                 renderCalendar();
