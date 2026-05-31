@@ -88,7 +88,7 @@
         /* --- HERO SECTION (Ajustes de Fondo y Estética) --- */
         .hero {
             position: relative;
-            padding: 60px 5% 80px;
+            padding: 100px 5% 80px;
             text-align: center;
             background: linear-gradient(180deg, var(--white) 0%, var(--light-bg) 100%);
             overflow: hidden;
