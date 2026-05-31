@@ -1,3 +1,2 @@
-# Repository CODEOWNERS
-
-* @actions/package-security
+ Repository CODEOWNERS* @actions/actions-oss-maintainers* @actions/package-security
+0 commit commentsComments0
