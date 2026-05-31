@@ -1,6 +1,9 @@
 
 <html lang="es">
-<head>
+<!-- SDK de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoltTech | Soluciones Residenciales</title>
@@ -8,7 +11,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- SDK de EmailJS para envío de correos sin backend -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script // Inicializar SDK de EmailJS
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+        // --- CONFIGURACIÓN DE SUPABASE ---
+        const SUPABASE_URL = "[https://gocnclndshscqonqqeyw.supabase.co](https://zsnmjgxodnyubllfclcs.supabase.co
+)";
+        const SUPABASE_ANON_KEY = "sb_publishable_sRuVndgaUPY-BqEjzkpo7g_UJc_aXxg";
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        // Función para guardar o actualizar filas en Supabase
+        async function saveToSupabase(req) {
+            if (!supabase) return;
+            try {
+                const { error } = await supabase.from('requests').upsert([req]);
+                if (error) throw error;
+                console.log("Sincronizado con Supabase con éxito:", req.ticket);
+            } catch (err) {
+                console.error("Error al sincronizar con Supabase:", err);
+            }
+        } type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <style>
         :root {
@@ -1581,17 +1603,16 @@
         } catch (readError) {
             console.error("Error leyendo solicitudes desde el almacenamiento local:", readError);
         }
+try {
+                        localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
+                        localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
+                        console.log("Solicitud guardada");
+                    } catch (storageError) {
+                        console.error("Error guardando localmente:", storageError);
+                    }
 
-        // Datos de prueba iniciales si está vacío
-        if (volttech_requests.length === 0) {
-            const today = new Date();
-            const formatDate = (offsetDays) => {
-                const targetDate = new Date(today);
-                targetDate.setDate(today.getDate() + offsetDays);
-                const yyyy = targetDate.getFullYear();
-                const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
-                const dd = String(targetDate.getDate()).padStart(2, '0');
-                return `${yyyy}-${mm}-${dd}`;
+                    // Sincronizar en Supabase (PEGAR ESTO AQUÍ)
+                    saveToSupabase(submissionData);
             };
 
             volttech_requests = [
