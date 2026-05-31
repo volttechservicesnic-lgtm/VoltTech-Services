@@ -2891,7 +2891,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    const supabaseUrl = "[TU_URL](https://zsnmjgxodnyubllfclcs.supabase.co
+    const supabaseUrl = "[[[UURL](https://zsnmjgxodnyubllfclcs.supabase.co/rest/v1/Solicitudes)](https://zsnmjgxodnyubllfclcs.supabase.co/rest/v1/Solicitudes)](https://zsnmjgxodnyubllfclcs.supabase.co
 )";
 const supabaseKey = "sb_publishable_sRuVndgaUPY-BqEjzkpo7g_UJc_aXxg";
 
