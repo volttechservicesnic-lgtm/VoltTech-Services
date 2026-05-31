@@ -42,7 +42,7 @@
         }
 
         .nav-logo {
-            height: 50px;
+            height: 45px;
             display: flex;
             align-items: center;
         }
@@ -68,7 +68,7 @@
         }
 
         .hero-logo-main {
-            max-width: 320px; /* El logo que enviaste como centro visual */
+            max-width: 220px; /* El logo que enviaste como centro visual */
             height: auto;
             margin-bottom: 20px;
         }
