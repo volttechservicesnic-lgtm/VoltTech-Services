@@ -2890,11 +2890,31 @@
             }
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    const supabaseUrl = "[[[UURL](https://zsnmjgxodnyubllfclcs.supabase.co/rest/v1/Solicitudes)](https://zsnmjgxodnyubllfclcs.supabase.co/rest/v1/Solicitudes)](https://zsnmjgxodnyubllfclcs.supabase.co
-)";
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+   const supabaseUrl = "https://zsnmjgxodnyubllfclcs.supabase.co";
 const supabaseKey = "sb_publishable_sRuVndgaUPY-BqEjzkpo7g_UJc_aXxg";
 
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+async function testInsert() {
+  const { data, error } = await supabase
+    .from('solicitudes')
+    .insert([
+      {
+        nombre: "PRUEBA",
+        email: "test@test.com",
+        telefono: "123",
+        direccion: "test",
+        servicio: "inspección eléctrica",
+        fecha: "2026-01-01",
+        hora: "10:00",
+        estado: "pendiente"
+      }
+    ]);
+
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+}
+
+testInsert();
 </body>
 </html>
