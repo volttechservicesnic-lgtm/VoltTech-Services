@@ -1606,8 +1606,8 @@
                     date: formatDate(1),
                     time: "10:30",
                     message: "Hay fluctuaciones constantes de voltaje en toda la casa, temo que dañe los equipos.",
-                    sconst EMAILJS_TEMPLATE_CONFIRM_ID = "template_i8im4bh";
-const EMAILJS_TEMPLATE_RESCHEDULE_ID = "template_i8im4bh";[
+                    status: "Pendiente",
+                    history: [
                         { date: new Date(today.getTime() - (5 * 24 * 60 * 60 * 1000)).toISOString(), action: "Solicitud registrada por el cliente.", actor: "Cliente" }
                     ]
                 },
@@ -2167,11 +2167,7 @@ const EMAILJS_TEMPLATE_RESCHEDULE_ID = "template_i8im4bh";[
             const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
             const dd = String(dateObj.getDate()).padStart(2, '0');
             return `${yyyy}-${mm}-${dd}`;
-     emailjs.send(
-    EMAILJS_SERVICE_ID,
-    EMAILJS_TEMPLATE_ADMIN_ID,
-    emailPayload
-);
+        };
 
         const renderCalendar = () => {
             // LOG: Renderizando calendario (REQUISITO MODO DEPURACIÓN)
@@ -2751,11 +2747,7 @@ const EMAILJS_TEMPLATE_RESCHEDULE_ID = "template_i8im4bh";[
 
             // Formularios administrativos (Proponer reagendamiento / Cancelar)
             const rescheduleForm = document.getElementById('admin-reschedule-form');
-           emailjs.send(
-    EMAILJS_SERVICE_ID,
-    EMAILJS_TEMPLATE_ADMIN_ID,
-    emailPayload
-);
+            if (rescheduleForm) {
                 rescheduleForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const ticketId = document.getElementById('reschedule-ticket-id').value;
