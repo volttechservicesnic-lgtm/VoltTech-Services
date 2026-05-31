@@ -7,7 +7,6 @@
     <!-- Fuente Inter: Técnica, limpia y profesional -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <!-- SDK de EmailJS para envío de correos sin backend -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
@@ -530,8 +529,9 @@
             background-color: var(--blue);
         }
 
+
         /* ==========================================================================
-           --- ESTILOS GENERALES DEL PANEL DE CONTROL ADMINISTRATIVO ---
+           --- ESTILOS GENERALES DEL PANEL DE CONTROL ADMINISTRATIVO (GÉNERICO) ---
            ========================================================================== */
         
         #admin-panel {
@@ -651,6 +651,7 @@
             justify-content: center;
         }
 
+        /* Colores dinámicos del dashboard */
         .stat-pending { background-color: #FEF3C7; color: #D97706; }
         .stat-confirmed { background-color: #E0F2FE; color: #0284C7; }
         .stat-completed { background-color: #D1FAE5; color: #059669; }
@@ -794,6 +795,7 @@
         .btn-action-cancel { background-color: #FEE2E2; color: #B91C1C; }
         .btn-action-cancel:hover { background-color: #FCA5A5; }
 
+        /* Tooltip simple para acciones */
         .btn-action::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -990,50 +992,29 @@
     </style>
 </head>
 <body>
-    <!-- INTERFAZ CLIENTE: RESPUESTAS DE ENLACES EXTERNOS (Aceptar / Rechazar / Proponer) -->
-    <div id="customer-action-view" style="display:none; min-height:85vh; background-color: #F3F4F6; padding: 40px 5%; align-items:center; justify-content:center;">
-        <div class="modal-content" style="max-width: 550px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;">
-            <div id="customer-loading">
-                <p>Cargando información de su solicitud...</p>
-            </div>
-            
-            <div id="customer-success" style="display:none;">
-                <div class="success-icon" style="color: #10B981; margin-bottom: 15px;">
-                    <i data-lucide="badge-check" style="width: 64px; height: 64px; margin: 0 auto;"></i>
-                </div>
-                <h2 id="customer-success-title" class="success-title">¡Respuesta Registrada!</h2>
-                <p id="customer-success-text" class="success-text" style="margin-bottom: 20px;">Su respuesta ha sido registrada exitosamente. Gracias por confiar en VoltTech.</p>
-                <button class="btn-close-modal" onclick="window.location.href = window.location.pathname">Volver al inicio</button>
-            </div>
-
-            <div id="customer-proposal-form-container" style="display:none; text-align: left;">
-                <div class="modal-header">
-                    <h2>Proponer Fecha Alternativa</h2>
-                    <p>Sugerir día y hora más conveniente para su inspección técnica de VoltTech.</p>
-                </div>
-                <form id="customer-proposal-form">
-                    <input type="hidden" id="cust-ticket-id">
-                    <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom:15px;">
-                        <div class="form-group">
-                            <label for="cust-new-date">Nueva Fecha Sugerida *</label>
-                            <input type="date" id="cust-new-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cust-new-time">Nueva Hora Sugerida *</label>
-                            <input type="time" id="cust-new-time" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-submit"><i data-lucide="send"></i> Enviar Alternativa al Administrador</button>
-                </form>
-            </div>
+    <!-- NAVEGACIÓN PRINCIPAL -->
+    <nav>
+        <div class="nav-logo">
+            <img src="logo.png" alt="VoltTech Logo">
         </div>
-    </div>
+        <div class="nav-links">
+            <a href="#servicios">Servicios</a>
+            <a href="#trabajos">Trabajos</a>
+            <a href="#contacto">Contacto</a>
+            <!-- Botones de acción directa -->
+            <a href="#" class="nav-btn-accent" id="nav-btn-inspection">Solicitar Inspección</a>
+            <a href="#" style="font-size: 13px; color: var(--text-muted); border-left: 1px solid var(--border); padding-left: 15px; display: inline-flex; align-items: center; gap: 5px;" id="nav-admin-access-btn">
+                <i data-lucide="shield-check" size="14"></i> Admin
+            </a>
+        </div>
+    </nav>
 
     <!-- BLOQUE COMPLETO DE LA PÁGINA PÚBLICA -->
     <div id="public-website">
         <!-- Sección Hero con marca de agua incorporada en fondo -->
         <section class="hero">
             <div class="hero-content">
+                <!-- Contenedor del Logo Principal con Proporciones Controladas -->
                 <div class="hero-logo-container">
                     <img src="logo.png" alt="VoltTech Soluciones Residenciales" class="hero-logo-main">
                 </div>
@@ -1041,6 +1022,7 @@
                 <p>Servicio técnico profesional de instalación y mantenimiento eléctrico y plomería. Atención segura y puntual para su hogar.</p>
                 
                 <div class="hero-actions">
+                    <!-- Botón de Inspección Técnica -->
                     <button class="btn-inspection" id="hero-btn-inspection">
                         <i data-lucide="clipboard-check"></i> Solicitar Inspección Técnica
                     </button>
@@ -1134,6 +1116,9 @@
                 <div>
                     <h3 style="margin-bottom: 15px; font-size: 1rem;">VoltTech</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">Servicios eléctricos y plomería.<br>Managua, Nicaragua.</p>
+                    <div class="footer-admin-link">
+                        <a href="#" id="footer-admin-trigger"><i data-lucide="lock" size="10"></i> Acceso al Panel de Control</a>
+                    </div>
                 </div>
                 <div>
                     <h3 style="margin-bottom: 15px; font-size: 1rem;">Contacto</h3>
@@ -1153,8 +1138,9 @@
         </footer>
     </div>
 
+
     <!-- ==========================================================================
-       --- SECCIÓN ADMINISTRATIVA COMPLETA ---
+       --- SECCIÓN ADMINISTRATIVA COMPLETA (OCULTA POR DEFECTO) ---
        ========================================================================== -->
     <div id="admin-panel">
         <header class="admin-header">
@@ -1174,9 +1160,6 @@
             </button>
             <button class="admin-tab-btn" data-tab="admin-tab-calendar">
                 <i data-lucide="calendar"></i> Calendario Visual
-            </button>
-            <button class="admin-tab-btn" data-tab="admin-tab-security">
-                <i data-lucide="lock"></i> Seguridad
             </button>
         </div>
 
@@ -1308,69 +1291,15 @@
                 </div>
             </section>
 
-            <!-- PESTAÑA 4: SEGURIDAD Y CONFIGURACIÓN -->
-            <section id="admin-tab-security" class="admin-section-content">
-                <div class="controls-card" style="max-width: 600px; margin: 0 auto 20px;">
-                    <h3 style="color: var(--navy); margin-bottom: 15px;"><i data-lucide="shield"></i> Configuración de Seguridad</h3>
-                    <form id="admin-security-settings-form">
-                        <div class="form-grid" style="grid-template-columns: 1fr;">
-                            <div class="form-group">
-                                <label for="sec-recovery-email">Correo Electrónico de Recuperación *</label>
-                                <input type="email" id="sec-recovery-email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="sec-recovery-phone">Número de Teléfono de Recuperación *</label>
-                                <input type="text" id="sec-recovery-phone" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="sec-auto-logout">Cierre Automático de Sesión (Inactividad) *</label>
-                                <select id="sec-auto-logout">
-                                    <option value="5">5 Minutos</option>
-                                    <option value="10">10 Minutos</option>
-                                    <option value="30">30 Minutos</option>
-                                    <option value="60">60 Minutos</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label style="font-weight: normal; font-size: 0.8rem; color: var(--text-muted);">
-                                    Último cambio de contraseña: <strong id="sec-last-pwd-change">-</strong>
-                                </label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-submit" style="margin-top: 15px;"><i data-lucide="save"></i> Guardar Configuración</button>
-                    </form>
-                </div>
-
-                <div class="controls-card" style="max-width: 600px; margin: 0 auto;">
-                    <h3 style="color: var(--navy); margin-bottom: 15px;"><i data-lucide="key-round"></i> Cambiar Contraseña</h3>
-                    <form id="admin-change-password-form">
-                        <div class="form-grid" style="grid-template-columns: 1fr;">
-                            <div class="form-group">
-                                <label for="pwd-current">Contraseña Actual *</label>
-                                <input type="password" id="pwd-current" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="pwd-new">Nueva Contraseña *</label>
-                                <input type="password" id="pwd-new" placeholder="Mínimo 8 caracteres, letras y números" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="pwd-confirm">Confirmar Nueva Contraseña *</label>
-                                <input type="password" id="pwd-confirm" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-submit" style="margin-top: 15px; background-color: var(--navy);"><i data-lucide="refresh-cw"></i> Actualizar Contraseña</button>
-                    </form>
-                </div>
-            </section>
-
         </div>
     </div>
+
 
     <!-- ==========================================================================
        --- VENTANAS EMERGENTES (MODALES) DE ADMINISTRACIÓN ---
        ========================================================================== -->
 
-    <!-- LOGIN MODAL DE SEGURIDAD (Con recuperación de contraseña) -->
+    <!-- LOGIN MODAL DE SEGURIDAD -->
     <div id="admin-login-modal">
         <div class="login-card" id="login-form-container">
             <h2><i data-lucide="lock"></i> Acceso Protegido</h2>
@@ -1580,9 +1509,7 @@
 
 
     <script>
-        // ==========================================================================
         // --- CONFIGURACIÓN DE EMAILJS ---
-        // ==========================================================================
         const EMAILJS_PUBLIC_KEY = "NFTtUpZvGUe9peZW1"; 
         const EMAILJS_SERVICE_ID = "service_volttech";
         
@@ -1811,6 +1738,18 @@
                 addHistoryEntry(req, `Propuesta de reagendamiento aceptada por el cliente. Nueva fecha confirmada: ${req.date} a las ${req.time}`, "Cliente");
                 localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
+                // Notificación de confirmación unificada al cliente utilizando la plantilla de cliente única (CLIENTE)
+                const clientPayload = {
+                    subject: `Reagendamiento Confirmado - ${req.ticket}`,
+                    ticket: req.ticket,
+                    name: req.name,
+                    email: req.email,
+                    service: req.service,
+                    date: req.date,
+                    time: req.time,
+                    message: `Su cita de inspección ha sido reprogramada exitosamente para la nueva fecha elegida.\n\nNueva fecha: ${req.date}\nNueva hora: ${req.time}` + INSTITUTIONAL_FOOTER
+                };
+
                 const adminPayload = {
                     ticket: req.ticket,
                     name: req.name,
@@ -1821,6 +1760,7 @@
                     message: `El cliente ${req.name} ha aceptado la propuesta de reagendamiento. La cita ha sido confirmada para el día ${req.date} a las ${req.time}.`
                 };
 
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, clientPayload);
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
                 if (customerLoading) customerLoading.style.display = 'none';
@@ -2339,7 +2279,7 @@
             if (closeBtnInspection) closeBtnInspection.addEventListener('click', closeModal);
             if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
 
-            // Envío del Formulario Público (Soportado con extractores seguros contra fallas DOM y control de timeouts)
+            // Envío del Formulario Público (Soportado con extractores seguros contra fallas DOM)
             const inspectionForm = document.getElementById('inspection-form');
             if (inspectionForm) {
                 inspectionForm.addEventListener('submit', function(e) {
@@ -2686,7 +2626,61 @@
                 });
             }
 
-            // Filtros administrativos de la tabla
+            const securitySettingsForm = document.getElementById('admin-security-settings-form');
+            if (securitySettingsForm) {
+                securitySettingsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const recEmail = document.getElementById('sec-recovery-email').value;
+                    const recPhone = document.getElementById('sec-recovery-phone').value;
+                    const autoLogout = document.getElementById('sec-auto-logout').value;
+
+                    localStorage.setItem('volttech_recovery_email', recEmail);
+                    localStorage.setItem('volttech_recovery_phone', recPhone);
+                    localStorage.setItem('volttech_auto_logout_time', autoLogout);
+
+                    alert("Ajustes guardados.");
+                    startAutoLogoutTracker();
+                });
+            }
+
+            const changePasswordForm = document.getElementById('admin-change-password-form');
+            if (changePasswordForm) {
+                changePasswordForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const current = document.getElementById('pwd-current').value;
+                    const newPwd = document.getElementById('pwd-new').value;
+                    const confirmPwd = document.getElementById('pwd-confirm').value;
+
+                    const currentHash = await hashPassword(current);
+                    const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
+
+                    if (currentHash !== storedHash) {
+                        alert("Clave actual incorrecta.");
+                        return;
+                    }
+
+                    const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+                    if (!pwdRegex.test(newPwd)) {
+                        alert("Mínimo 8 caracteres, al menos un número y una letra.");
+                        return;
+                    }
+
+                    if (newPwd !== confirmPwd) {
+                        alert("Las contraseñas no coinciden.");
+                        return;
+                    }
+
+                    const newHash = await hashPassword(newPwd);
+                    localStorage.setItem('volttech_admin_pwd_hash', newHash);
+                    localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
+
+                    alert("Cambio seguro procesado.");
+                    changePasswordForm.reset();
+                    loadSecurityTab();
+                });
+            }
+
+            // Table filters
             const searchBox = document.getElementById('admin-search-box');
             const filterStatus = document.getElementById('admin-filter-status');
             const filterService = document.getElementById('admin-filter-service');
@@ -2697,19 +2691,19 @@
             if (filterStatus) filterStatus.addEventListener('change', renderTable);
             if (filterService) filterService.addEventListener('change', renderTable);
             if (filterDate) filterDate.addEventListener('change', renderTable);
-            
+
             if (clearFiltersBtn) {
                 clearFiltersBtn.addEventListener('click', () => {
                     const searchEl = document.getElementById('admin-search-box');
                     const statusEl = document.getElementById('admin-filter-status');
                     const serviceEl = document.getElementById('admin-filter-service');
                     const dateEl = document.getElementById('admin-filter-date');
-                    
+
                     if (searchEl) searchEl.value = '';
                     if (statusEl) statusEl.value = '';
                     if (serviceEl) serviceEl.value = '';
                     if (dateEl) dateEl.value = '';
-                    
+
                     renderTable();
                 });
             }
@@ -2727,7 +2721,7 @@
                         const targetTab = btn.getAttribute('data-tab');
                         const targetEl = document.getElementById(targetTab);
                         if (targetEl) targetEl.classList.add('active');
-                        
+
                         if (targetTab === 'admin-tab-calendar') {
                             renderCalendar();
                         }
@@ -2735,7 +2729,6 @@
                 });
             }
 
-            // Cerrado de modales específicos
             const closeRescheduleBtn = document.getElementById('close-modal-reschedule-btn');
             if (closeRescheduleBtn) {
                 closeRescheduleBtn.addEventListener('click', () => {
@@ -2862,60 +2855,6 @@
                 nextMonthBtn.addEventListener('click', () => {
                     calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
                     renderCalendar();
-                });
-            }
-
-            const securitySettingsForm = document.getElementById('admin-security-settings-form');
-            if (securitySettingsForm) {
-                securitySettingsForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const recEmail = document.getElementById('sec-recovery-email').value;
-                    const recPhone = document.getElementById('sec-recovery-phone').value;
-                    const autoLogout = document.getElementById('sec-auto-logout').value;
-
-                    localStorage.setItem('volttech_recovery_email', recEmail);
-                    localStorage.setItem('volttech_recovery_phone', recPhone);
-                    localStorage.setItem('volttech_auto_logout_time', autoLogout);
-
-                    alert("Ajustes guardados.");
-                    startAutoLogoutTracker();
-                });
-            }
-
-            const changePasswordForm = document.getElementById('admin-change-password-form');
-            if (changePasswordForm) {
-                changePasswordForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const current = document.getElementById('pwd-current').value;
-                    const newPwd = document.getElementById('pwd-new').value;
-                    const confirmPwd = document.getElementById('pwd-confirm').value;
-
-                    const currentHash = await hashPassword(current);
-                    const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
-
-                    if (currentHash !== storedHash) {
-                        alert("Clave actual incorrecta.");
-                        return;
-                    }
-
-                    const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-                    if (!pwdRegex.test(newPwd)) {
-                        alert("Mínimo 8 caracteres, al menos un número y una letra.");
-                        return;
-                    }
-
-                    if (newPwd !== confirmPwd) {
-                        alert("Las contraseñas no coinciden.");
-                        return;
-                    }
-
-                    const newHash = await hashPassword(newPwd);
-                    localStorage.setItem('volttech_admin_pwd_hash', newHash);
-                    localStorage.setItem('volttech_last_pwd_change', new Date().toISOString());
-
-                    alert("Cambio seguro procesado.");
-                    changePasswordForm.reset();
-                    loadSecurityTab();
                 });
             }
         }
