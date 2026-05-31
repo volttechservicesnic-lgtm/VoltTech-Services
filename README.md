@@ -1,4 +1,3 @@
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -992,22 +991,44 @@
     </style>
 </head>
 <body>
-    <!-- NAVEGACIÓN PRINCIPAL -->
-    <nav>
-        <div class="nav-logo">
-            <img src="logo.png" alt="VoltTech Logo">
+    <!-- INTERFAZ CLIENTE: RESPUESTAS DE ENLACES EXTERNOS (Aceptar / Rechazar / Proponer) -->
+    <div id="customer-action-view" style="display:none; min-height:85vh; background-color: #F3F4F6; padding: 40px 5%; align-items:center; justify-content:center;">
+        <div class="modal-content" style="max-width: 550px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;">
+            <div id="customer-loading">
+                <p>Cargando información técnica de su solicitud...</p>
+            </div>
+            
+            <div id="customer-success" style="display:none;">
+                <div class="success-icon" style="color: #10B981; margin-bottom: 15px;">
+                    <i data-lucide="badge-check" style="width: 64px; height: 64px; margin: 0 auto;"></i>
+                </div>
+                <h2 id="customer-success-title" class="success-title">¡Respuesta Registrada!</h2>
+                <p id="customer-success-text" class="success-text" style="margin-bottom: 20px;">Su respuesta ha sido registrada exitosamente. Gracias por confiar en VoltTech.</p>
+                <button class="btn-close-modal" onclick="window.location.href = window.location.pathname">Volver al inicio</button>
+            </div>
+
+            <div id="customer-proposal-form-container" style="display:none; text-align: left;">
+                <div class="modal-header">
+                    <h2>Proponer Fecha Alternativa</h2>
+                    <p>Sugerir día y hora más conveniente para su inspección técnica de VoltTech.</p>
+                </div>
+                <form id="customer-proposal-form">
+                    <input type="hidden" id="cust-ticket-id">
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom:15px;">
+                        <div class="form-group">
+                            <label for="cust-new-date">Nueva Fecha Sugerida *</label>
+                            <input type="date" id="cust-new-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cust-new-time">Nueva Hora Sugerida *</label>
+                            <input type="time" id="cust-new-time" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i data-lucide="send"></i> Enviar Alternativa al Administrador</button>
+                </form>
+            </div>
         </div>
-        <div class="nav-links">
-            <a href="#servicios">Servicios</a>
-            <a href="#trabajos">Trabajos</a>
-            <a href="#contacto">Contacto</a>
-            <!-- Botones de acción directa -->
-            <a href="#" class="nav-btn-accent" id="nav-btn-inspection">Solicitar Inspección</a>
-            <a href="#" style="font-size: 13px; color: var(--text-muted); border-left: 1px solid var(--border); padding-left: 15px; display: inline-flex; align-items: center; gap: 5px;" id="nav-admin-access-btn">
-                <i data-lucide="shield-check" size="14"></i> Admin
-            </a>
-        </div>
-    </nav>
+    </div>
 
     <!-- BLOQUE COMPLETO DE LA PÁGINA PÚBLICA -->
     <div id="public-website">
@@ -1757,7 +1778,7 @@
                     phone: req.phone,
                     service: req.service,
                     subject: `Reagendación aceptada - ${req.ticket}`,
-                    message: `El cliente ${req.name} ha aceptado la propuesta de reagendamiento. La cita ha sido confirmada para el día ${req.date} a las ${req.time}.`
+                    message: `El cliente ${req.name} ha aceptado la propuesta de reagendamiento. La cita ha sido confirmada automáticamente para el día ${req.date} a las ${req.time}.`
                 };
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, clientPayload);
@@ -2771,7 +2792,7 @@
                     const cancelLink = `${currentOrigin}?action=reject&ticket=${req.ticket}`; // Redirección si el cliente rechaza
                     const proposeLink = `${currentOrigin}?action=propose&ticket=${req.ticket}`;
 
-                    const msgBody = `Por motivos operativos no podremos atenderle en la fecha inicialmente prevista. Le proponemos una nueva fecha y hora para la realización del servicio.\n\n` +
+                    const msgBody = `Por motivos operativos le proponemos una nueva fecha para la realización del servicio.\n\n` +
                         `• Servicio: ${req.service}\n` +
                         `• Nueva fecha propuesta: ${newDate}\n` +
                         `• Nueva hora propuesta: ${newTime}\n\n` +
