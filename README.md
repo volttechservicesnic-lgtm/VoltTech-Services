@@ -1,4 +1,4 @@
-# VoltTech-Services<!DOCTYPE html>
+# VoltTech-Services
 <html lang="es">
 <head>
     <meta charset="UTF-8">
