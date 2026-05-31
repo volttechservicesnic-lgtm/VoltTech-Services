@@ -2899,6 +2899,10 @@ async function testInsert() {
   const { data, error } = await supabase
     .from('solicitudes')
     .insert([
+async function testInsert() {
+  const { data, error } = await supabase
+    .from('solicitudes')
+    .insert([
       {
         nombre: "PRUEBA",
         email: "test@test.com",
@@ -2910,8 +2914,7 @@ async function testInsert() {
         estado: "pendiente"
       }
     ]);
-</body>
-</html>
+
   console.log("DATA:", data);
   console.log("ERROR:", error);
 }
