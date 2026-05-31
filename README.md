@@ -92,7 +92,7 @@
             }
         }
 
-        /* --- HERO SECTION --- */
+        /* --- HERO SECTION (Ajustes de Fondo y Estética) --- */
         .hero {
             position: relative;
             padding: 60px 5% 80px;
@@ -1615,7 +1615,7 @@
 
 
         // ==========================================================================
-        // --- ASIGNACIÓN ÚNICA DE ELEMENTOS DEL DOM (SOLUCIONA DUPLICADOS) ---
+        // --- ASIGNACIÓN DE ELEMENTOS DEL DOM ---
         // ==========================================================================
         
         // Sitio Público y Formulario
@@ -1658,13 +1658,6 @@
         const btnResetPasswordSubmit = document.getElementById('btn-reset-password-submit');
         const recoveryInputCode = document.getElementById('recovery-input-code');
         const btnBackToLogin = document.getElementById('btn-back-to-login');
-
-        // Filtros y Controles del Listado Administrativo
-        const searchBox = document.getElementById('admin-search-box');
-        const filterStatus = document.getElementById('admin-filter-status');
-        const filterService = document.getElementById('admin-filter-service');
-        const filterDate = document.getElementById('admin-filter-date');
-        const clearFiltersBtn = document.getElementById('admin-clear-filters');
 
 
         // ==========================================================================
@@ -1763,18 +1756,18 @@
         // ==========================================================================
         const openModal = (e) => {
             if (e) e.preventDefault();
-            modalInspection.classList.add('active');
+            if (modalInspection) modalInspection.classList.add('active');
             document.body.style.overflow = 'hidden'; 
         };
 
         const closeModal = () => {
-            modalInspection.classList.remove('active');
+            if (modalInspection) modalInspection.classList.remove('active');
             document.body.style.overflow = ''; 
             
             setTimeout(() => {
-                inspectionForm.reset();
-                formContainer.style.display = 'block';
-                successContainer.style.display = 'none';
+                if (inspectionForm) inspectionForm.reset();
+                if (formContainer) formContainer.style.display = 'block';
+                if (successContainer) successContainer.style.display = 'none';
             }, 300);
         };
 
@@ -1798,18 +1791,19 @@
             return `VT-${yyyy}${mm}${dd}-${randomDigits}`;
         };
 
-        // EVENTO SUBMIT DEL FORMULARIO PÚBLICO (CORREGIDO Y DIAGNOSTICADO)
+        // EVENTO SUBMIT DEL FORMULARIO PÚBLICO
         if (inspectionForm) {
             inspectionForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // REQ 6: console.log de diagnóstico obligado
                 console.log("Formulario enviado");
 
                 const submitBtn = inspectionForm.querySelector('.btn-submit');
-                const originalBtnHTML = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = 'Enviando Solicitud...';
+                const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = 'Enviando Solicitud...';
+                }
 
                 const referenceCode = generateVTCode();
 
@@ -1830,7 +1824,7 @@
                     ]
                 };
 
-                // Guardar localmente
+                // Guardar localmente de forma segura
                 volttech_requests.push(submissionData);
                 try {
                     localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
@@ -1838,30 +1832,41 @@
                     console.log("Registro guardado con éxito localmente:", submissionData);
                 } catch (storageError) {
                     console.error("Error crítico guardando en localStorage:", storageError);
-                    // REQ 7: Mostrar error en pantalla ante fallas del almacenamiento local
-                    alert("Error local: Su navegador restringió el almacenamiento de datos. Intentaremos procesar el envío de correo.");
                 }
 
-                // Despachar correos simultáneos
+                // Despachar correos simultáneos mediante EmailJS
                 const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData);
                 const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData);
 
                 Promise.all([sendToClient, sendToAdmin])
                     .then(([resClient, resAdmin]) => {
-                        console.log("SUCCESS [PÚBLICO]: Peticiones despachadas con éxito.", resClient, resAdmin);
+                        console.log("SUCCESS [PÚBLICO]: Correos enviados correctamente.", resClient, resAdmin);
                         mostrarPantallaExito(referenceCode);
-                        syncAdminPanel();
+                        
+                        // Sincronizar el panel dentro de un bloque seguro para no alterar el éxito del cliente
+                        try {
+                            syncAdminPanel();
+                        } catch (adminError) {
+                            console.error("Error de sincronización interna del panel (No crítico para el usuario):", adminError);
+                        }
                     })
                     .catch((error) => {
                         console.error("ERROR [PÚBLICO]: Error devuelto por EmailJS.", error);
-                        // REQ 7: Mostrar error visible en pantalla
-                        alert("Atención: Los servidores de correo respondieron con un error (" + (error.text || error) + "). Por favor, anote su código de orden para seguimiento directo: " + referenceCode);
-                        mostrarPantallaExito(referenceCode); // Mostramos pantalla para preservar el flujo
-                        syncAdminPanel();
+                        // Mostrar error visible únicamente en caso de falla real de envío de correos
+                        alert("Atención: Los servidores de correo respondieron con un error (" + (error.text || error) + "). Por favor, capture su código de orden para seguimiento directo: " + referenceCode);
+                        mostrarPantallaExito(referenceCode); 
+                        
+                        try {
+                            syncAdminPanel();
+                        } catch (adminError) {
+                            console.error("Error de sincronización interna del panel (No crítico para el usuario):", adminError);
+                        }
                     })
                     .finally(() => {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalBtnHTML;
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnHTML;
+                        }
                     });
             });
         }
@@ -1871,21 +1876,22 @@
         // --- DETECCIÓN DE ENLACES DE CLIENTES (ACCIONES DE CORREO) ---
         // ==========================================================================
         async function handleCustomerAction(action, ticketId) {
-            publicWebsite.style.display = 'none';
-            customerActionView.style.display = 'flex';
+            if (publicWebsite) publicWebsite.style.display = 'none';
+            if (customerActionView) customerActionView.style.display = 'flex';
 
             volttech_requests = JSON.parse(localStorage.getItem('volttech_all_requests')) || [];
             const reqIndex = volttech_requests.findIndex(r => r.ticket === ticketId);
 
             if (reqIndex === -1) {
-                customerLoading.innerHTML = `<p style="color:var(--status-cancelled); font-weight:700;">Error: No se localizó la solicitud con código ${ticketId}.</p>`;
+                if (customerLoading) {
+                    customerLoading.innerHTML = `<p style="color:var(--status-cancelled); font-weight:700;">Error: No se localizó la solicitud con código ${ticketId}.</p>`;
+                }
                 return;
             }
 
             const req = volttech_requests[reqIndex];
 
             if (action === 'accept') {
-                // Acepta reagendación
                 req.status = "Reagendada Confirmada";
                 if (req.newDate && req.newTime) {
                     req.date = req.newDate;
@@ -1895,7 +1901,6 @@
                 addHistoryEntry(req, `Propuesta aceptada por el cliente. Nueva fecha: ${req.date} a las ${req.time}`, "Cliente");
                 localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
 
-                // Notificación administrativa
                 const adminPayload = {
                     ticket: req.ticket,
                     name: req.name,
@@ -1908,13 +1913,12 @@
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
-                customerLoading.style.display = 'none';
-                customerSuccessTitle.textContent = "¡Cita Confirmada!";
-                customerSuccessText.textContent = `La propuesta fue aceptada. Su nueva cita está programada para el día ${req.date} a las ${req.time}.`;
-                customerSuccess.style.display = 'block';
+                if (customerLoading) customerLoading.style.display = 'none';
+                if (customerSuccessTitle) customerSuccessTitle.textContent = "¡Cita Confirmada!";
+                if (customerSuccessText) customerSuccessText.textContent = `La propuesta fue aceptada. Su nueva cita está programada para el día ${req.date} a las ${req.time}.`;
+                if (customerSuccess) customerSuccess.style.display = 'block';
 
             } else if (action === 'cancel') {
-                // Cancela solicitud
                 req.status = "Cancelada por Cliente";
                 addHistoryEntry(req, "El cliente canceló la orden mediante enlace directo de correo.", "Cliente");
                 localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
@@ -1931,18 +1935,21 @@
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
-                customerLoading.style.display = 'none';
-                customerSuccessTitle.textContent = "Servicio Cancelado";
-                customerSuccessText.textContent = "La solicitud técnica ha sido retirada de nuestra lista de visitas activas.";
-                customerSuccess.style.display = 'block';
+                if (customerLoading) customerLoading.style.display = 'none';
+                if (customerSuccessTitle) customerSuccessTitle.textContent = "Servicio Cancelado";
+                if (customerSuccessText) customerSuccessText.textContent = "La solicitud técnica ha sido de baja de nuestra lista de visitas activas.";
+                if (customerSuccess) customerSuccess.style.display = 'block';
 
             } else if (action === 'propose') {
-                // Desea proponer otra fecha
-                customerLoading.style.display = 'none';
-                document.getElementById('cust-ticket-id').value = ticketId;
-                document.getElementById('cust-new-date').value = req.date;
-                document.getElementById('cust-new-time').value = req.time;
-                customerProposalContainer.style.display = 'block';
+                if (customerLoading) customerLoading.style.display = 'none';
+                const ticketInput = document.getElementById('cust-ticket-id');
+                const dateInput = document.getElementById('cust-new-date');
+                const timeInput = document.getElementById('cust-new-time');
+                
+                if (ticketInput) ticketInput.value = ticketId;
+                if (dateInput) dateInput.value = req.date;
+                if (timeInput) timeInput.value = req.time;
+                if (customerProposalContainer) customerProposalContainer.style.display = 'block';
             }
             lucide.createIcons();
         }
@@ -1979,10 +1986,10 @@
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, adminPayload);
 
-                customerProposalContainer.style.display = 'none';
-                customerSuccessTitle.textContent = "Sugerencia Recibida";
-                customerSuccessText.textContent = `La propuesta alternativa (${customDate} a las ${customTime}) ha sido enviada al administrador. Evaluaremos el ajuste de agenda inmediatamente.`;
-                customerSuccess.style.display = 'block';
+                if (customerProposalContainer) customerProposalContainer.style.display = 'none';
+                if (customerSuccessTitle) customerSuccessTitle.textContent = "Sugerencia Recibida";
+                if (customerSuccessText) customerSuccessText.textContent = `La propuesta alternativa (${customDate} a las ${customTime}) ha sido enviada al administrador. Evaluaremos el ajuste de agenda inmediatamente.`;
+                if (customerSuccess) customerSuccess.style.display = 'block';
                 lucide.createIcons();
             });
         }
@@ -1993,15 +2000,19 @@
         // ==========================================================================
         const showLoginModal = (e) => {
             e.preventDefault();
-            adminLoginModal.classList.add('active');
-            loginFormContainer.style.display = 'block';
-            recoveryFormContainer.style.display = 'none';
-            adminLoginPassword.value = '';
-            adminLoginPassword.focus();
+            if (adminLoginModal) adminLoginModal.classList.add('active');
+            if (loginFormContainer) loginFormContainer.style.display = 'block';
+            if (recoveryFormContainer) recoveryFormContainer.style.display = 'none';
+            if (adminLoginPassword) {
+                adminLoginPassword.value = '';
+                adminLoginPassword.focus();
+            }
         };
 
         if (navAdminAccessBtn) navAdminAccessBtn.addEventListener('click', showLoginModal);
-        if (adminLoginCancel) adminLoginCancel.addEventListener('click', () => adminLoginModal.classList.remove('active'));
+        if (adminLoginCancel) adminLoginCancel.addEventListener('click', () => {
+            if (adminLoginModal) adminLoginModal.classList.remove('active');
+        });
 
         // Cifrado y login
         if (adminLoginForm) {
@@ -2011,7 +2022,7 @@
                 const storedHash = localStorage.getItem('volttech_admin_pwd_hash');
 
                 if (inputHash === storedHash) {
-                    adminLoginModal.classList.remove('active');
+                    if (adminLoginModal) adminLoginModal.classList.remove('active');
                     enterAdminPanel();
                 } else {
                     alert("Contraseña de administración incorrecta.");
@@ -2022,8 +2033,8 @@
         }
 
         const enterAdminPanel = () => {
-            publicWebsite.style.display = 'none';
-            adminPanel.style.display = 'block';
+            if (publicWebsite) publicWebsite.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'block';
             resetActivityTimer();
             startAutoLogoutTracker();
             syncAdminPanel();
@@ -2033,8 +2044,8 @@
 
         const exitAdminPanel = () => {
             if (autoLogoutInterval) clearInterval(autoLogoutInterval);
-            adminPanel.style.display = 'none';
-            publicWebsite.style.display = 'block';
+            if (adminPanel) adminPanel.style.display = 'none';
+            if (publicWebsite) publicWebsite.style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'instant' });
         };
 
@@ -2056,7 +2067,7 @@
             if (autoLogoutInterval) clearInterval(autoLogoutInterval);
 
             autoLogoutInterval = setInterval(() => {
-                if (adminPanel.style.display === 'block') {
+                if (adminPanel && adminPanel.style.display === 'block') {
                     const inactiveTime = Date.now() - lastActivityTime;
                     if (inactiveTime >= autoLogoutMs) {
                         exitAdminPanel();
@@ -2066,28 +2077,35 @@
             }, 10000); 
         }
 
-        adminPanel.addEventListener('mousemove', resetActivityTimer);
-        adminPanel.addEventListener('keydown', resetActivityTimer);
-        adminPanel.addEventListener('click', resetActivityTimer);
+        if (adminPanel) {
+            adminPanel.addEventListener('mousemove', resetActivityTimer);
+            adminPanel.addEventListener('keydown', resetActivityTimer);
+            adminPanel.addEventListener('click', resetActivityTimer);
+        }
 
 
         // --- RECUPERACIÓN DE CONTRASEÑA ---
         if (forgotPasswordTrigger) {
             forgotPasswordTrigger.addEventListener('click', (e) => {
                 e.preventDefault();
-                loginFormContainer.style.display = 'none';
-                recoveryFormContainer.style.display = 'block';
-                document.getElementById('recovery-step-1').style.display = 'block';
-                document.getElementById('recovery-step-2').style.display = 'none';
-                document.getElementById('recovery-step-3').style.display = 'none';
+                if (loginFormContainer) loginFormContainer.style.display = 'none';
+                if (recoveryFormContainer) recoveryFormContainer.style.display = 'block';
+                
+                const r1 = document.getElementById('recovery-step-1');
+                const r2 = document.getElementById('recovery-step-2');
+                const r3 = document.getElementById('recovery-step-3');
+                
+                if (r1) r1.style.display = 'block';
+                if (r2) r2.style.display = 'none';
+                if (r3) r3.style.display = 'none';
             });
         }
 
         if (btnBackToLogin) {
             btnBackToLogin.addEventListener('click', (e) => {
                 e.preventDefault();
-                recoveryFormContainer.style.display = 'none';
-                loginFormContainer.style.display = 'block';
+                if (recoveryFormContainer) recoveryFormContainer.style.display = 'none';
+                if (loginFormContainer) loginFormContainer.style.display = 'block';
             });
         }
 
@@ -2108,9 +2126,12 @@
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESET_CODE_ID, payload)
                     .then(() => {
                         alert(`Se ha enviado un código temporal a: ${recoveryEmail}`);
-                        document.getElementById('recovery-step-1').style.display = 'none';
-                        document.getElementById('recovery-step-2').style.display = 'block';
-                        recoveryInputCode.focus();
+                        const r1 = document.getElementById('recovery-step-1');
+                        const r2 = document.getElementById('recovery-step-2');
+                        
+                        if (r1) r1.style.display = 'none';
+                        if (r2) r2.style.display = 'block';
+                        if (recoveryInputCode) recoveryInputCode.focus();
                     })
                     .catch((error) => {
                         console.error("Falla recuperador EmailJS:", error);
@@ -2125,24 +2146,31 @@
 
         if (btnVerifyRecoveryCode) {
             btnVerifyRecoveryCode.addEventListener('click', () => {
-                const inputVal = recoveryInputCode.value.trim();
+                const inputVal = recoveryInputCode ? recoveryInputCode.value.trim() : '';
                 const storedCode = sessionStorage.getItem('volttech_temp_recovery_code');
 
                 if (inputVal === storedCode && inputVal !== '') {
-                    document.getElementById('recovery-step-2').style.display = 'none';
-                    document.getElementById('recovery-step-3').style.display = 'block';
+                    const r2 = document.getElementById('recovery-step-2');
+                    const r3 = document.getElementById('recovery-step-3');
+                    if (r2) r2.style.display = 'none';
+                    if (r3) r3.style.display = 'block';
                 } else {
                     alert("Código incorrecto.");
-                    recoveryInputCode.value = '';
-                    recoveryInputCode.focus();
+                    if (recoveryInputCode) {
+                        recoveryInputCode.value = '';
+                        recoveryInputCode.focus();
+                    }
                 }
             });
         }
 
         if (btnResetPasswordSubmit) {
             btnResetPasswordSubmit.addEventListener('click', async () => {
-                const newPwd = document.getElementById('rec-new-pwd').value;
-                const confirmPwd = document.getElementById('rec-confirm-pwd').value;
+                const newPwdEl = document.getElementById('rec-new-pwd');
+                const confirmPwdEl = document.getElementById('rec-confirm-pwd');
+                
+                const newPwd = newPwdEl ? newPwdEl.value : '';
+                const confirmPwd = confirmPwdEl ? confirmPwdEl.value : '';
 
                 const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
                 if (!pwdRegex.test(newPwd)) {
@@ -2161,20 +2189,25 @@
 
                 alert("Cambio de clave exitoso.");
                 sessionStorage.removeItem('volttech_temp_recovery_code');
-                recoveryFormContainer.style.display = 'none';
-                loginFormContainer.style.display = 'block';
+                if (recoveryFormContainer) recoveryFormContainer.style.display = 'none';
+                if (loginFormContainer) loginFormContainer.style.display = 'block';
             });
         }
 
 
         // --- PESTAÑA SEGURIDAD ---
         function loadSecurityTab() {
-            document.getElementById('sec-recovery-email').value = localStorage.getItem('volttech_recovery_email') || '';
-            document.getElementById('sec-recovery-phone').value = localStorage.getItem('volttech_recovery_phone') || '';
-            document.getElementById('sec-auto-logout').value = localStorage.getItem('volttech_auto_logout_time') || '10';
+            const emailEl = document.getElementById('sec-recovery-email');
+            const phoneEl = document.getElementById('sec-recovery-phone');
+            const logoutEl = document.getElementById('sec-auto-logout');
+            const lastChangeEl = document.getElementById('sec-last-pwd-change');
+
+            if (emailEl) emailEl.value = localStorage.getItem('volttech_recovery_email') || '';
+            if (phoneEl) phoneEl.value = localStorage.getItem('volttech_recovery_phone') || '';
+            if (logoutEl) logoutEl.value = localStorage.getItem('volttech_auto_logout_time') || '10';
             
             const lastChange = localStorage.getItem('volttech_last_pwd_change');
-            document.getElementById('sec-last-pwd-change').textContent = lastChange ? new Date(lastChange).toLocaleString('es-NI') : 'Nunca';
+            if (lastChangeEl) lastChangeEl.textContent = lastChange ? new Date(lastChange).toLocaleString('es-NI') : 'Nunca';
         }
 
         const securitySettingsForm = document.getElementById('admin-security-settings-form');
@@ -2254,25 +2287,36 @@
                 return reqDate.getFullYear() === currentYear && reqDate.getMonth() === currentMonth;
             }).length;
 
-            document.getElementById('stat-count-pending').textContent = pending;
-            document.getElementById('stat-count-confirmed').textContent = confirmed;
-            document.getElementById('stat-count-completed').textContent = completed;
-            document.getElementById('stat-count-cancelled').textContent = cancelled;
-            document.getElementById('stat-count-month').textContent = totalThisMonth;
+            const elPending = document.getElementById('stat-count-pending');
+            const elConfirmed = document.getElementById('stat-count-confirmed');
+            const elCompleted = document.getElementById('stat-count-completed');
+            const elCancelled = document.getElementById('stat-count-cancelled');
+            const elMonth = document.getElementById('stat-count-month');
+
+            if (elPending) elPending.textContent = pending;
+            if (elConfirmed) elConfirmed.textContent = confirmed;
+            if (elCompleted) elCompleted.textContent = completed;
+            if (elCancelled) elCancelled.textContent = cancelled;
+            if (elMonth) elMonth.textContent = totalThisMonth;
         };
 
         const filterAndSearchRequests = () => {
-            const query = searchBox.value.toLowerCase().trim();
-            const statusVal = filterStatus.value;
-            const serviceVal = filterService.value;
-            const dateVal = filterDate.value;
+            const searchEl = document.getElementById('admin-search-box');
+            const statusEl = document.getElementById('admin-filter-status');
+            const serviceEl = document.getElementById('admin-filter-service');
+            const dateEl = document.getElementById('admin-filter-date');
+
+            const query = searchEl ? searchEl.value.toLowerCase().trim() : '';
+            const statusVal = statusEl ? statusEl.value : '';
+            const serviceVal = serviceEl ? serviceEl.value : '';
+            const dateVal = dateEl ? dateEl.value : '';
 
             return volttech_requests.filter(r => {
                 const matchesSearch = !query || 
-                    r.ticket.toLowerCase().includes(query) ||
-                    r.name.toLowerCase().includes(query) ||
-                    r.phone.toLowerCase().includes(query) ||
-                    r.email.toLowerCase().includes(query);
+                    (r.ticket && r.ticket.toLowerCase().includes(query)) ||
+                    (r.name && r.name.toLowerCase().includes(query)) ||
+                    (r.phone && r.phone.toLowerCase().includes(query)) ||
+                    (r.email && r.email.toLowerCase().includes(query));
 
                 const matchesStatus = !statusVal || r.status === statusVal;
                 const matchesService = !serviceVal || r.service === serviceVal;
@@ -2287,6 +2331,8 @@
         const renderTable = () => {
             const filtered = filterAndSearchRequests();
             const tbody = document.getElementById('admin-table-body');
+            if (!tbody) return;
+
             tbody.innerHTML = '';
 
             if (filtered.length === 0) {
@@ -2300,6 +2346,10 @@
                 const creationDate = new Date(r.createdAt).toLocaleDateString('es-NI', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 const dateDisplay = r.newDate ? `<span style="text-decoration: line-through; opacity: 0.6;">${r.date}</span><br><span style="color:var(--status-rescheduled); font-weight:700;">${r.newDate}</span>` : r.date;
                 const timeDisplay = r.newTime ? `<span style="text-decoration: line-through; opacity: 0.6;">${r.time}</span><br><span style="color:var(--status-rescheduled); font-weight:700;">${r.newTime}</span>` : r.time;
+                
+                // Defensa contra estados corruptos o nulos
+                const currentStatus = r.status || "Pendiente";
+                const statusBadgeClass = currentStatus.toLowerCase().replace(/ /g, '_');
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -2312,13 +2362,13 @@
                     <td>${r.service}</td>
                     <td>${dateDisplay}</td>
                     <td>${timeDisplay}</td>
-                    <td><span class="badge badge-${r.status.toLowerCase().replace(/ /g, '_')}">${r.status}</span></td>
+                    <td><span class="badge badge-${statusBadgeClass}">${currentStatus}</span></td>
                     <td style="text-align: center;">
                         <div class="actions-cell">
                             <button class="btn-action btn-action-view" data-tooltip="Ver detalles" onclick="viewRequestDetails('${r.ticket}')">
                                 <i data-lucide="eye" size="14"></i>
                             </button>
-                            ${r.status === 'Pendiente' || r.status === 'Esperando revisión del administrador' ? `
+                            ${currentStatus === 'Pendiente' || currentStatus === 'Esperando revisión del administrador' ? `
                                 <button class="btn-action btn-action-confirm" data-tooltip="Confirmar" onclick="confirmRequest('${r.ticket}')">
                                     <i data-lucide="check" size="14"></i>
                                 </button>
@@ -2329,7 +2379,7 @@
                                     <i data-lucide="x" size="14"></i>
                                 </button>
                             ` : ''}
-                            ${r.status === 'Confirmada' || r.status === 'Reagendada Confirmada' ? `
+                            ${currentStatus === 'Confirmada' || currentStatus === 'Reagendada Confirmada' ? `
                                 <button class="btn-action btn-action-complete" data-tooltip="Completar" onclick="completeRequest('${r.ticket}')">
                                     <i data-lucide="check-square" size="14"></i>
                                 </button>
@@ -2337,7 +2387,7 @@
                                     <i data-lucide="x" size="14"></i>
                                 </button>
                             ` : ''}
-                            ${r.status === 'Propuesta de Reagendación Pendiente' ? `
+                            ${currentStatus === 'Propuesta de Reagendación Pendiente' ? `
                                 <span style="font-size:0.75rem; color:var(--text-muted); font-style:italic; padding:6px;">Esperando cliente</span>
                             ` : ''}
                         </div>
@@ -2355,10 +2405,16 @@
         
         if (clearFiltersBtn) {
             clearFiltersBtn.addEventListener('click', () => {
-                searchBox.value = '';
-                filterStatus.value = '';
-                filterService.value = '';
-                filterDate.value = '';
+                const searchEl = document.getElementById('admin-search-box');
+                const statusEl = document.getElementById('admin-filter-status');
+                const serviceEl = document.getElementById('admin-filter-service');
+                const dateEl = document.getElementById('admin-filter-date');
+                
+                if (searchEl) searchEl.value = '';
+                if (statusEl) statusEl.value = '';
+                if (serviceEl) serviceEl.value = '';
+                if (dateEl) dateEl.value = '';
+                
                 renderTable();
             });
         }
@@ -2370,6 +2426,7 @@
             if (!req) return;
 
             const content = document.getElementById('admin-details-content');
+            if (!content) return;
             
             let extraInfo = '';
             if (req.confirmedAt) {
@@ -2404,9 +2461,12 @@
             }
             historyHtml += '</div></div>';
 
+            const currentStatus = req.status || "Pendiente";
+            const statusBadgeClass = currentStatus.toLowerCase().replace(/ /g, '_');
+
             content.innerHTML = `
                 <div class="detail-item"><h4>Código UVT:</h4><p style="font-weight:700; color:var(--navy);">${req.ticket}</p></div>
-                <div class="detail-item"><h4>Estado:</h4><p><span class="badge badge-${req.status.toLowerCase().replace(/ /g, '_')}">${req.status}</span></p></div>
+                <div class="detail-item"><h4>Estado:</h4><p><span class="badge badge-${statusBadgeClass}">${currentStatus}</span></p></div>
                 <div class="detail-item"><h4>Fecha de Creación:</h4><p>${new Date(req.createdAt).toLocaleString('es-NI')}</p></div>
                 <div class="detail-item"><h4>Tipo de Servicio:</h4><p>${req.service}</p></div>
                 <div class="detail-item"><h4>Nombre del Cliente:</h4><p>${req.name}</p></div>
@@ -2420,12 +2480,9 @@
                 ${historyHtml}
             `;
 
-            document.getElementById('admin-modal-details').classList.add('active');
+            const detailModal = document.getElementById('admin-modal-details');
+            if (detailModal) detailModal.classList.add('active');
         };
-
-        document.getElementById('close-modal-details-btn').addEventListener('click', () => {
-            document.getElementById('admin-modal-details').classList.remove('active');
-        });
 
         window.confirmRequest = (ticketId) => {
             if (!confirm(`¿Confirmar la solicitud técnica ${ticketId}? Se enviará un correo de confirmación al cliente.`)) return;
@@ -2466,16 +2523,23 @@
             const req = volttech_requests.find(r => r.ticket === ticketId);
             if (!req) return;
 
-            document.getElementById('reschedule-ticket-id').value = ticketId;
-            document.getElementById('reschedule-new-date').value = req.date;
-            document.getElementById('reschedule-new-time').value = req.time;
+            const inputId = document.getElementById('reschedule-ticket-id');
+            const inputDate = document.getElementById('reschedule-new-date');
+            const inputTime = document.getElementById('reschedule-new-time');
 
-            rescheduleModal.classList.add('active');
+            if (inputId) inputId.value = ticketId;
+            if (inputDate) inputDate.value = req.date;
+            if (inputTime) inputTime.value = req.time;
+
+            if (rescheduleModal) rescheduleModal.classList.add('active');
         };
 
-        document.getElementById('close-modal-reschedule-btn').addEventListener('click', () => {
-            rescheduleModal.classList.remove('active');
-        });
+        const closeRescheduleBtn = document.getElementById('close-modal-reschedule-btn');
+        if (closeRescheduleBtn) {
+            closeRescheduleBtn.addEventListener('click', () => {
+                if (rescheduleModal) rescheduleModal.classList.remove('active');
+            });
+        }
 
         if (rescheduleForm) {
             rescheduleForm.addEventListener('submit', (e) => {
@@ -2514,7 +2578,7 @@
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESCHEDULE_ID, emailPayload);
 
-                rescheduleModal.classList.remove('active');
+                if (rescheduleModal) rescheduleModal.classList.remove('active');
                 syncAdminPanel();
                 alert(`Se ha enviado la propuesta de reagendamiento al cliente.`);
             });
@@ -2540,14 +2604,20 @@
         const cancelForm = document.getElementById('admin-cancel-form');
 
         window.openCancelModal = (ticketId) => {
-            document.getElementById('cancel-ticket-id').value = ticketId;
-            document.getElementById('cancel-reason').value = '';
-            cancelModal.classList.add('active');
+            const inputId = document.getElementById('cancel-ticket-id');
+            const reasonArea = document.getElementById('cancel-reason');
+
+            if (inputId) inputId.value = ticketId;
+            if (reasonArea) reasonArea.value = '';
+            if (cancelModal) cancelModal.classList.add('active');
         };
 
-        document.getElementById('close-modal-cancel-btn').addEventListener('click', () => {
-            cancelModal.classList.remove('active');
-        });
+        const closeCancelBtn = document.getElementById('close-modal-cancel-btn');
+        if (closeCancelBtn) {
+            closeCancelBtn.addEventListener('click', () => {
+                if (cancelModal) cancelModal.classList.remove('active');
+            });
+        }
 
         if (cancelForm) {
             cancelForm.addEventListener('submit', (e) => {
@@ -2575,7 +2645,7 @@
 
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, emailPayload);
 
-                cancelModal.classList.remove('active');
+                if (cancelModal) cancelModal.classList.remove('active');
                 syncAdminPanel();
                 alert(`La solicitud ${ticketId} ha sido cancelada.`);
             });
@@ -2599,7 +2669,8 @@
             const year = calendarCurrentDate.getFullYear();
             const month = calendarCurrentDate.getMonth();
 
-            document.getElementById('calendar-current-month-label').textContent = `${monthNames[month]} ${year}`;
+            const monthLabel = document.getElementById('calendar-current-month-label');
+            if (monthLabel) monthLabel.textContent = `${monthNames[month]} ${year}`;
 
             const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
             daysOfWeek.forEach(day => {
@@ -2655,10 +2726,10 @@
 
             dayEvents.forEach(evt => {
                 const eventPill = document.createElement('div');
-                const cleanStatusClass = evt.status.toLowerCase().replace(/ /g, '_');
+                const cleanStatusClass = (evt.status || "Pendiente").toLowerCase().replace(/ /g, '_');
                 eventPill.className = `calendar-event-pill event-pill-${cleanStatusClass}`;
-                eventPill.textContent = `${evt.time} - ${evt.name}`;
-                eventPill.setAttribute('title', `${evt.service} (${evt.name})`);
+                eventPill.textContent = `${evt.time || ''} - ${evt.name || ''}`;
+                eventPill.setAttribute('title', `${evt.service || ''} (${evt.name || ''})`);
                 
                 eventPill.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -2672,15 +2743,45 @@
             return cell;
         };
 
-        document.getElementById('calendar-prev-month').addEventListener('click', () => {
-            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
-            renderCalendar();
-        });
+        const prevMonthBtn = document.getElementById('calendar-prev-month');
+        if (prevMonthBtn) {
+            prevMonthBtn.addEventListener('click', () => {
+                calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+                renderCalendar();
+            });
+        }
 
-        document.getElementById('calendar-next-month').addEventListener('click', () => {
-            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
-            renderCalendar();
-        });
+        const nextMonthBtn = document.getElementById('calendar-next-month');
+        if (nextMonthBtn) {
+            nextMonthBtn.addEventListener('click', () => {
+                calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+                renderCalendar();
+            });
+        }
+
+
+        // ==========================================================================
+        // --- NAVEGACIÓN POR PESTAÑAS (MÓDULO SEGURO BAJO CONDICIÓN) ---
+        // ==========================================================================
+        const tabButtons = document.querySelectorAll('.admin-tab-btn');
+        const tabContents = document.querySelectorAll('.admin-section-content');
+
+        if (tabButtons && tabButtons.length > 0) {
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    const targetTab = btn.getAttribute('data-tab');
+                    const targetEl = document.getElementById(targetTab);
+                    if (targetEl) targetEl.classList.add('active');
+                    
+                    if (targetTab === 'admin-tab-calendar') {
+                        renderCalendar();
+                    }
+                });
+            });
+        }
 
 
         // --- INICIALIZADOR GLOBAL (PAGE LOAD) ---
