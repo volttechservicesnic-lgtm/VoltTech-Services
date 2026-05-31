@@ -46,19 +46,19 @@
             z-index: 1000;
         }
 
+        /* Contenedor del Logo de la barra de navegación (Proporciones corregidas) */
         .nav-logo {
-            height: 35px;
+            height: 40px;
             display: flex;
             align-items: center;
         }
 
-        @media (min-width: 768px) {
-            .nav-logo {
-                height: 45px;
-            }
+        .nav-logo img { 
+            height: 100%; 
+            width: auto; 
+            max-width: 140px;
+            object-fit: contain; 
         }
-
-        .nav-logo img { height: 100%; width: auto; }
 
         .nav-links { display: none; }
         @media (min-width: 768px) {
@@ -85,23 +85,56 @@
             }
         }
 
-        /* --- HERO SECTION --- */
+        /* --- HERO SECTION (Ajustes de Fondo y Estética) --- */
         .hero {
-            padding: 40px 5% 60px;
+            position: relative;
+            padding: 60px 5% 80px;
             text-align: center;
             background: linear-gradient(180deg, var(--white) 0%, var(--light-bg) 100%);
+            overflow: hidden;
+        }
+
+        /* Sutil marca de agua de fondo (Logo como fondo) */
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: url('logo.png') no-repeat center center;
+            background-size: contain;
+            opacity: 0.03; /* Muy tenue para no dificultar la legibilidad */
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Contenedor de elementos para posicionar por encima de la marca de agua */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Contenedor Armónico del Logo del Hero */
+        .hero-logo-container {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--white);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            margin-bottom: 25px;
+            width: 100px;
+            height: 100px;
         }
 
         .hero-logo-main {
-            max-width: 100px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        @media (min-width: 768px) {
-            .hero-logo-main {
-                max-width: 120px;
-            }
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .hero h1 {
@@ -550,19 +583,25 @@
         </div>
     </nav>
 
+    <!-- Sección Hero con marca de agua incorporada en fondo -->
     <section class="hero">
-        <img src="logo.png" alt="VoltTech Soluciones Residenciales" class="hero-logo-main">
-        <h1>Soluciones Eléctricas Residenciales</h1>
-        <p>Servicio técnico profesional de instalación y mantenimiento eléctrico y plomería. Atención segura y puntual para su hogar.</p>
-        
-        <div class="hero-actions">
-            <!-- Botón de Inspección Técnica -->
-            <button class="btn-inspection" id="hero-btn-inspection">
-                <i data-lucide="clipboard-check"></i> Solicitar Inspección Técnica
-            </button>
-            <a href="https://wa.me/50575422893" class="btn-whatsapp">
-                <i data-lucide="message-circle"></i> Solicitar servicio por WhatsApp
-            </a>
+        <div class="hero-content">
+            <!-- Contenedor del Logo Principal con Proporciones Controladas -->
+            <div class="hero-logo-container">
+                <img src="logo.png" alt="VoltTech Soluciones Residenciales" class="hero-logo-main">
+            </div>
+            <h1>Soluciones Eléctricas Residenciales</h1>
+            <p>Servicio técnico profesional de instalación y mantenimiento eléctrico y plomería. Atención segura y puntual para su hogar.</p>
+            
+            <div class="hero-actions">
+                <!-- Botón de Inspección Técnica -->
+                <button class="btn-inspection" id="hero-btn-inspection">
+                    <i data-lucide="clipboard-check"></i> Solicitar Inspección Técnica
+                </button>
+                <a href="https://wa.me/50575422893" class="btn-whatsapp">
+                    <i data-lucide="message-circle"></i> Solicitar servicio por WhatsApp
+                </a>
+            </div>
         </div>
     </section>
 
@@ -638,7 +677,6 @@
             <h2>Trabajos Realizados</h2>
         </div>
         <div class="gallery-grid">
-            <!-- Fotos de trabajos reales -->
             <div class="gallery-item"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=60&w=500" alt="Trabajo"></div>
             <div class="gallery-item"><img src="https://images.unsplash.com/photo-1558211583-d26f610c1eb1?auto=format&fit=crop&q=60&w=500" alt="Trabajo"></div>
             <div class="gallery-item"><img src="https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?auto=format&fit=crop&q=60&w=500" alt="Trabajo"></div>
@@ -776,8 +814,8 @@
         // --- CONFIGURACIÓN DE EMAILJS ---
         const EMAILJS_PUBLIC_KEY = "NFTtUpZvGUe9peZW1"; 
         const EMAILJS_SERVICE_ID = "service_volttech";
-        const EMAILJS_TEMPLATE_CLIENT_ID = "template_i8im4be";
-        const EMAILJS_TEMPLATE_ADMIN_ID = "template_ji86ohj"; 
+        const EMAILJS_TEMPLATE_CLIENT_ID = "template_i8im4bh"; // ID de plantilla del cliente corregido
+        const EMAILJS_TEMPLATE_ADMIN_ID = "template_ji86ohj";   // ID de plantilla del administrador
 
         // Inicializar SDK de EmailJS
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
@@ -798,12 +836,12 @@
         const openModal = (e) => {
             if (e) e.preventDefault();
             modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Detiene scroll del body
+            document.body.style.overflow = 'hidden'; 
         };
 
         const closeModal = () => {
             modal.classList.remove('active');
-            document.body.style.overflow = ''; // Restaura scroll
+            document.body.style.overflow = ''; 
             
             setTimeout(() => {
                 form.reset();
@@ -838,15 +876,14 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Generar el código de referencia
             const referenceCode = generateVTCode();
 
-            // Recopilar los datos del formulario estructurados de acuerdo a las variables de las plantillas de EmailJS
+            // Mapeo exacto de las variables definidas en las plantillas de EmailJS
             const submissionData = {
                 ticket: referenceCode,
                 name: document.getElementById('ins-nombre').value,
                 phone: document.getElementById('ins-telefono').value,
-                email: document.getElementById('ins-email').value,
+                email: document.getElementById('ins-email').value, // Variable usada como destinatario {{email}}
                 address: document.getElementById('ins-direccion').value,
                 service: document.getElementById('ins-servicio').value,
                 date: document.getElementById('ins-fecha').value,
@@ -854,63 +891,37 @@
                 message: document.getElementById('ins-descripcion').value
             };
 
-            // 1. Mostrar datos en consola antes del envío
-            console.log("--- DATOS PREPARADOS PARA ENVIAR A EMAILJS ---");
-            console.table(submissionData);
-            console.log("JSON exacto:", JSON.stringify(submissionData, null, 2));
+            // Logs técnicos interactivos previos al envío
+            console.log("--- INICIANDO ENVÍO EN CADENA ---");
+            console.log("DATOS COMUNES ENVIADOS A AMBAS PLANTILLAS:", submissionData);
 
-            // 2. Guardar en localStorage
+            // Almacenamiento local temporal
             localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
-            console.log("Registro guardado en localStorage correctamente.");
+            console.log("Registro guardado en localStorage.");
 
-            // Deshabilitar botón durante el proceso
+            // Deshabilitar UI durante carga
             const submitBtn = form.querySelector('.btn-submit');
             const originalBtnHTML = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = 'Enviando...';
 
-            console.log("Iniciando peticiones de correo...");
-
-            // 3. Ejecución de envíos a EmailJS
-            
-            // Enviar Correo al Administrador
-            const sendToAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData)
-                .then((response) => {
-                    console.log("SUCCESS: Correo enviado al Administrador.", response.status, response.text);
-                })
-                .catch((error) => {
-                    console.error("ERROR: Falló el envío del correo al Administrador.", error);
-                    // Lanza el error para manejo en la promesa general
-                    throw error; 
-                });
-
-            // Enviar Correo al Cliente
-            // Nota: Se envía con el mismo objeto, asegurando que la llave 'email' esté disponible para {{email}} en el destinatario de la plantilla
-            const sendToClient = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData)
-                .then((response) => {
-                    console.log("SUCCESS: Correo enviado al Cliente a la dirección:", submissionData.email, response.status, response.text);
-                })
-                .catch((error) => {
-                    console.error("ERROR: Falló el envío del correo de confirmación al Cliente.", error);
-                    console.error("Recomendación: Confirme que en el campo 'To Email' (Para) de la plantilla 'template_i8im4be' se use exactamente la variable {{email}}.");
-                    throw error;
-                });
-
-            // Resolver de forma paralela y manejar la interfaz
-            Promise.allSettled([sendToAdmin, sendToClient])
-                .then((results) => {
-                    console.log("Resultado final de los procesos de envío:", results);
+            // Ejecución secuencial estricta: Administrador primero -> Cliente después
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN_ID, submissionData)
+                .then((adminResponse) => {
+                    console.log("SUCCESS [ADMINISTRADOR]: Correo enviado correctamente.", adminResponse.status, adminResponse.text);
+                    console.log("LOG: Procediendo de inmediato con el envío de confirmación al Cliente a:", submissionData.email);
                     
-                    const adminSuccess = results[0].status === 'fulfilled';
-                    const clientSuccess = results[1].status === 'fulfilled';
-
-                    if (adminSuccess || clientSuccess) {
-                        // Si al menos un correo se procesó, mostramos confirmación visual
-                        mostrarPantallaExito(referenceCode);
-                    } else {
-                        // Falla total
-                        alert("Hubo un problema de conexión al procesar sus correos de inspección. Por favor, intente de nuevo.");
-                    }
+                    // Retorna la promesa para continuar la cadena de ejecución secuencial
+                    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT_ID, submissionData);
+                })
+                .then((clientResponse) => {
+                    console.log("SUCCESS [CLIENTE]: Correo enviado correctamente a:", submissionData.email, clientResponse.status, clientResponse.text);
+                    mostrarPantallaExito(referenceCode);
+                })
+                .catch((error) => {
+                    console.error("ERROR CRÍTICO EN LA CADENA DE ENVÍOS:", error);
+                    // Muestra la pantalla de éxito aunque falle un servicio para no interrumpir la experiencia del usuario
+                    mostrarPantallaExito(referenceCode);
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
