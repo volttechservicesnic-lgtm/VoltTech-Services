@@ -55,7 +55,7 @@
 
         .nav-logo img { 
             height: 100%; 
-            width: 120; 
+            width: auto; 
             max-width: 140px;
             object-fit: contain; 
         }
