@@ -1,36 +1,18 @@
 
 <html lang="es">
-<!-- SDK de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-    <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoltTech | Soluciones Residenciales</title>
     <!-- Fuente Inter: Técnica, limpia y profesional -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <!-- SDK de EmailJS para envío de correos sin backend -->
-    <script // Inicializar SDK de EmailJS
-        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-        // --- CONFIGURACIÓN DE SUPABASE ---
-        const SUPABASE_URL = "[https://gocnclndshscqonqqeyw.supabase.co](https://zsnmjgxodnyubllfclcs.supabase.co
-)";
-        const SUPABASE_ANON_KEY = "sb_publishable_sRuVndgaUPY-BqEjzkpo7g_UJc_aXxg";
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-        // Función para guardar o actualizar filas en Supabase
-        async function saveToSupabase(req) {
-            if (!supabase) return;
-            try {
-                const { error } = await supabase.from('requests').upsert([req]);
-                if (error) throw error;
-                console.log("Sincronizado con Supabase con éxito:", req.ticket);
-            } catch (err) {
-                console.error("Error al sincronizar con Supabase:", err);
-            }
-        } type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- SDK oficial de Supabase para manejo de base de datos relacional en cliente -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
@@ -1014,22 +996,44 @@
     </style>
 </head>
 <body>
-    <!-- NAVEGACIÓN PRINCIPAL -->
-    <nav>
-        <div class="nav-logo">
-            <img src="logo.png" alt="VoltTech Logo">
+    <!-- INTERFAZ CLIENTE: RESPUESTAS DE ENLACES EXTERNOS (Aceptar / Rechazar / Proponer) -->
+    <div id="customer-action-view" style="display:none; min-height:85vh; background-color: #F3F4F6; padding: 40px 5%; align-items:center; justify-content:center;">
+        <div class="modal-content" style="max-width: 550px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;">
+            <div id="customer-loading">
+                <p>Cargando información técnica de su solicitud...</p>
+            </div>
+            
+            <div id="customer-success" style="display:none;">
+                <div class="success-icon" style="color: #10B981; margin-bottom: 15px;">
+                    <i data-lucide="badge-check" style="width: 64px; height: 64px; margin: 0 auto;"></i>
+                </div>
+                <h2 id="customer-success-title" class="success-title">¡Respuesta Registrada!</h2>
+                <p id="customer-success-text" class="success-text" style="margin-bottom: 20px;">Su respuesta ha sido registrada exitosamente. Gracias por confiar en VoltTech.</p>
+                <button class="btn-close-modal" onclick="window.location.href = window.location.pathname">Volver al inicio</button>
+            </div>
+
+            <div id="customer-proposal-form-container" style="display:none; text-align: left;">
+                <div class="modal-header">
+                    <h2>Proponer Fecha Alternativa</h2>
+                    <p>Sugerir día y hora más conveniente para su inspección técnica de VoltTech.</p>
+                </div>
+                <form id="customer-proposal-form">
+                    <input type="hidden" id="cust-ticket-id">
+                    <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom:15px;">
+                        <div class="form-group">
+                            <label for="cust-new-date">Nueva Fecha Sugerida *</label>
+                            <input type="date" id="cust-new-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cust-new-time">Nueva Hora Sugerida *</label>
+                            <input type="time" id="cust-new-time" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit"><i data-lucide="send"></i> Enviar Alternativa al Administrador</button>
+                </form>
+            </div>
         </div>
-        <div class="nav-links">
-            <a href="#servicios">Servicios</a>
-            <a href="#trabajos">Trabajos</a>
-            <a href="#contacto">Contacto</a>
-            <!-- Botones de acción directa -->
-            <a href="#" class="nav-btn-accent" id="nav-btn-inspection">Solicitar Inspección</a>
-            <a href="#" style="font-size: 13px; color: var(--text-muted); border-left: 1px solid var(--border); padding-left: 15px; display: inline-flex; align-items: center; gap: 5px;" id="nav-admin-access-btn">
-                <i data-lucide="shield-check" size="14"></i> Admin
-            </a>
-        </div>
-    </nav>
+    </div>
 
     <!-- BLOQUE COMPLETO DE LA PÁGINA PÚBLICA -->
     <div id="public-website">
@@ -1603,16 +1607,17 @@
         } catch (readError) {
             console.error("Error leyendo solicitudes desde el almacenamiento local:", readError);
         }
-try {
-                        localStorage.setItem('volttech_all_requests', JSON.stringify(volttech_requests));
-                        localStorage.setItem('volttech_last_inspection', JSON.stringify(submissionData));
-                        console.log("Solicitud guardada");
-                    } catch (storageError) {
-                        console.error("Error guardando localmente:", storageError);
-                    }
 
-                    // Sincronizar en Supabase (PEGAR ESTO AQUÍ)
-                    saveToSupabase(submissionData);
+        // Datos de prueba iniciales si está vacío
+        if (volttech_requests.length === 0) {
+            const today = new Date();
+            const formatDate = (offsetDays) => {
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + offsetDays);
+                const yyyy = targetDate.getFullYear();
+                const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(targetDate.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
             };
 
             volttech_requests = [
@@ -2792,7 +2797,7 @@ try {
                     const cancelLink = `${currentOrigin}?action=reject&ticket=${req.ticket}`; // Redirección si el cliente rechaza
                     const proposeLink = `${currentOrigin}?action=propose&ticket=${req.ticket}`;
 
-                    const msgBody = `Por motivos operativos no podremos atenderle en la fecha inicialmente prevista. Le proponemos una nueva fecha y hora para la realización del servicio.\n\n` +
+                    const msgBody = `Por motivos operativos le proponemos una nueva fecha para la realización del servicio.\n\n` +
                         `• Servicio: ${req.service}\n` +
                         `• Nueva fecha propuesta: ${newDate}\n` +
                         `• Nueva hora propuesta: ${newTime}\n\n` +
@@ -2911,35 +2916,5 @@ try {
             }
         });
     </script>
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-   const supabaseUrl = "https://zsnmjgxodnyubllfclcs.supabase.co";
-const supabaseKey = "sb_publishable_sRuVndgaUPY-BqEjzkpo7g_UJc_aXxg";
-
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-async function testInsert() {
-  const { data, error } = await supabase
-    .from('solicitudes')
-    .insert([
-async function testInsert() {
-  const { data, error } = await supabase
-    .from('solicitudes')
-    .insert([
-      {
-        nombre: "PRUEBA",
-        email: "test@test.com",
-        telefono: "123",
-        direccion: "test",
-        servicio: "inspección eléctrica",
-        fecha: "2026-01-01",
-        hora: "10:00",
-        estado: "pendiente"
-      }
-    ]);
-
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
-}
-
-testInsert();
 </body>
 </html>
