@@ -1,3 +1,4 @@
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -2917,3 +2918,5 @@
     </script>
 </body>
 </html>
+
+solo necesito el pedacito de codigo para agregarlo a mi codigo actual para copiar y pega r
