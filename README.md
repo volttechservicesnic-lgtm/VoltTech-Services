@@ -1,4 +1,3 @@
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -7,8 +6,12 @@
     <!-- Fuente Inter: Técnica, limpia y profesional -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <!-- SDK de EmailJS para envío de correos sin backend -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- SDK oficial de Supabase para manejo de base de datos relacional -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
@@ -655,7 +658,7 @@
         .stat-pending { background-color: #FEF3C7; color: #D97706; }
         .stat-confirmed { background-color: #E0F2FE; color: #0284C7; }
         .stat-completed { background-color: #D1FAE5; color: #059669; }
-        .stat-cancelled { background-color: #FEE2E2; color: #DC2626; }
+        .stat-cancelled { background-color: #FEE2E2; color: #B91C1C; }
         .stat-total { background-color: #F3F4F6; color: var(--navy); }
 
         /* --- FILTROS Y CONTROLES DE TABLA --- */
@@ -996,7 +999,7 @@
     <div id="customer-action-view" style="display:none; min-height:85vh; background-color: #F3F4F6; padding: 40px 5%; align-items:center; justify-content:center;">
         <div class="modal-content" style="max-width: 550px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;">
             <div id="customer-loading">
-                <p>Cargando información técnica de su solicitud...</p>
+                <p>Cargando información de su solicitud...</p>
             </div>
             
             <div id="customer-success" style="display:none;">
@@ -1138,6 +1141,9 @@
                 <div>
                     <h3 style="margin-bottom: 15px; font-size: 1rem;">VoltTech</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted);">Servicios eléctricos y plomería.<br>Managua, Nicaragua.</p>
+                    <div class="footer-admin-link">
+                        <a href="#" id="footer-admin-trigger"><i data-lucide="lock" size="10"></i> Acceso al Panel de Control</a>
+                    </div>
                 </div>
                 <div>
                     <h3 style="margin-bottom: 15px; font-size: 1rem;">Contacto</h3>
